@@ -1,8 +1,9 @@
 # Honest Dating
 
-A Flutter architecture skeleton for a future dating app. It provides an
-iOS-style app shell, named-route navigation, a local placeholder repository,
-and one representative BLoC-driven Discover screen.
+A Flutter foundation for Honest Dating. It provides a reference-aligned visual
+system, a BLoC-driven Google/Apple authentication entry screen, named-route
+navigation, a local placeholder repository, and one representative Discover
+screen.
 
 ## Structure
 
@@ -11,6 +12,7 @@ and one representative BLoC-driven Discover screen.
   the current local implementations.
 - `lib/ui/routing` owns named routes and composition.
 - `lib/ui/screens` contains feature screens and their BLoCs.
+- `lib/ui/widgets` contains the shared controls used by Epic 1 flows.
 - `lib/resources` holds configuration, localization, and future visual assets.
 
 ## Firebase
@@ -18,6 +20,10 @@ and one representative BLoC-driven Discover screen.
 Firebase Core is initialized at launch, but the app currently has no Firestore
 data access or documented Firestore collections. The Discover screen uses a
 local placeholder profile.
+
+Google and Apple buttons on the welcome screen are intentionally local entry
+points until the approved Firebase Authentication configuration is supplied in
+US-1.1.1. They do not authenticate a user or collect any data in this slice.
 
 The iOS Firebase configuration is supplied locally at
 `ios/Runner/Firebase/Staging/GoogleService-Info.plist` and is copied into the

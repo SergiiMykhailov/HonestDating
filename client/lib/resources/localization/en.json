@@ -1,4 +1,9 @@
 {
   "app_name": "Honest Dating",
-  "onboarding_title": "A respectful place to meet."
+  "onboarding_eyebrow": "Connection, with intention.",
+  "onboarding_title": "Dating that feels more human.",
+  "onboarding_body": "Meet people who are here for the same reason you are — honestly.",
+  "onboarding_panel_title": "Start with your account",
+  "onboarding_panel_body": "New here or returning? Choose a secure sign-in method to continue.",
+  "onboarding_legal_notice": "Before registration is complete, you will review our Terms of Service and Privacy Policy."
 }

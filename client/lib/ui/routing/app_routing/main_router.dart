@@ -47,7 +47,9 @@ class MainRouter implements BaseRouter {
             );
           case BaseRouter.onboarding:
           default:
-            return const OnboardingScreen();
+            return OnboardingScreen(
+              repository: _repositoriesFactory.makeAuthenticationRepository(),
+            );
         }
       },
     );

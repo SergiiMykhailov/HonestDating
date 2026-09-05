@@ -1,8 +1,15 @@
+import 'package:honest_dating/repositories/app_repositories/app_authentication_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_discovery_repository.dart';
+import 'package:honest_dating/repositories/base/base_authentication_repository.dart';
 import 'package:honest_dating/repositories/base/base_discovery_repository.dart';
 import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
 
 class AppRepositoriesFactory implements BaseRepositoriesFactory {
+  @override
+  BaseAuthenticationRepository makeAuthenticationRepository() {
+    return AppAuthenticationRepository();
+  }
+
   @override
   BaseDiscoveryRepository makeDiscoveryRepository() {
     return AppDiscoveryRepository();
