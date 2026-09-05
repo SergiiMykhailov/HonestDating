@@ -10,6 +10,7 @@
 ## Data and privacy
 
 - Use local fake data unless an approved backend contract and configuration are supplied.
+- Keep the documented database structure current whenever an entity, field, collection, or stored-data format is added, changed, or removed. Update the relevant database documentation in the same change.
 - Do not add API keys, secrets, access tokens, personal data, or production endpoints to source control, fixtures, logs, or sample data.
 - Do not request a device permission or add an analytics/advertising SDK without an explicit product requirement and a reviewed user-facing purpose string.
 

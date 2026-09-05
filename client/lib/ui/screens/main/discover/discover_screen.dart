@@ -37,9 +37,7 @@ class _DiscoverView extends StatelessWidget {
             }
 
             if (state is DiscoverScreenFailure) {
-              return const Center(
-                child: Text('Unable to load placeholder profiles.'),
-              );
+              return const Center(child: Text('Unable to load profiles.'));
             }
 
             final profiles = (state as DiscoverScreenLoaded).profiles;

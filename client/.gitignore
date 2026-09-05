@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase app configuration is supplied locally per environment.
+ios/Runner/Firebase/**/GoogleService-Info.plist
+android/app/google-services.json

@@ -1,4 +1,4 @@
-package com.honestdating.honest_dating
+package com.honestdating
 
 import io.flutter.embedding.android.FlutterActivity
 
