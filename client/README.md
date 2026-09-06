@@ -25,6 +25,20 @@ Google and Apple buttons on the welcome screen are intentionally local entry
 points until the approved Firebase Authentication configuration is supplied in
 US-1.1.1. They do not authenticate a user or collect any data in this slice.
 
+In debug builds only, triple-tap the navy welcome area above the sign-in panel
+to preview the next phone-verification screen. This flow-preview shortcut is
+not included in release builds.
+
+The local phone-verification preview accepts only `012345` as its verification
+code, then opens the following age-eligibility mock screen. It does not send
+an SMS or retain a phone number.
+
+The age-eligibility preview accepts a real calendar date in `DD.MM.YYYY`
+format only when the user is at least 18, then opens the consent placeholder.
+
+The consent preview enables Continue only after both document switches are on,
+then opens the identity-verification placeholder. It stores no consent record.
+
 The iOS Firebase configuration is supplied locally at
 `ios/Runner/Firebase/Staging/GoogleService-Info.plist` and is copied into the
 Runner target at build time. Add `android/app/google-services.json` before

@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/models/authentication_provider.dart';
 import 'package:honest_dating/repositories/base/base_authentication_repository.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
+import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/onboarding/bloc/onboarding_screen_bloc.dart';
 import 'package:honest_dating/ui/screens/onboarding/bloc/onboarding_screen_event.dart';
 import 'package:honest_dating/ui/screens/onboarding/bloc/onboarding_screen_state.dart';
@@ -36,6 +40,22 @@ class _OnboardingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final welcomeArea = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(24, 22, 24, 0),
+          child: _BrandLockup(),
+        ),
+        const Spacer(),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 28),
+          child: _WelcomeCopy(),
+        ),
+        const SizedBox(height: 48),
+      ],
+    );
+
     return SafeArea(
       bottom: false,
       child: LayoutBuilder(
@@ -47,16 +67,19 @@ class _OnboardingView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(24, 22, 24, 0),
-                      child: _BrandLockup(),
-                    ),
-                    const Spacer(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 28),
-                      child: _WelcomeCopy(),
-                    ),
-                    const SizedBox(height: 48),
+                    if (kDebugMode)
+                      Expanded(
+                        child: _TripleTapAdvance(
+                          onTriggered: () {
+                            Navigator.of(
+                              context,
+                            ).pushNamed(BaseRouter.phoneVerification);
+                          },
+                          child: welcomeArea,
+                        ),
+                      )
+                    else
+                      Expanded(child: welcomeArea),
                     const _AuthenticationPanel(),
                   ],
                 ),
@@ -65,6 +88,53 @@ class _OnboardingView extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _TripleTapAdvance extends StatefulWidget {
+  const _TripleTapAdvance({required this.child, required this.onTriggered});
+
+  final Widget child;
+  final VoidCallback onTriggered;
+
+  @override
+  State<_TripleTapAdvance> createState() => _TripleTapAdvanceState();
+}
+
+class _TripleTapAdvanceState extends State<_TripleTapAdvance> {
+  static const _tripleTapTimeout = Duration(milliseconds: 700);
+
+  Timer? _tapTimeout;
+  int _tapCount = 0;
+
+  @override
+  void dispose() {
+    _tapTimeout?.cancel();
+    super.dispose();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _tapTimeout?.cancel();
+    _tapCount += 1;
+
+    if (_tapCount == 3) {
+      _tapCount = 0;
+      widget.onTriggered();
+      return;
+    }
+
+    _tapTimeout = Timer(_tripleTapTimeout, () {
+      _tapCount = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: _onTapUp,
+      child: widget.child,
     );
   }
 }

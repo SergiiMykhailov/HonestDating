@@ -15,28 +15,34 @@ class AppNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+
     return Container(
-      height: 80,
+      width: double.infinity,
+      height: topInset + 68,
       decoration: const BoxDecoration(
         color: AppColors.canvas,
         border: Border(bottom: BorderSide(color: AppColors.line)),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.ink,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
+      child: Padding(
+        padding: EdgeInsets.only(top: topInset),
+        child: SizedBox(
+          height: 68,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.ink,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            if (leading != null) Positioned(left: 16, child: leading!),
-            if (trailing != null) Positioned(right: 16, child: trailing!),
-          ],
+              if (leading != null) Positioned(left: 16, child: leading!),
+              if (trailing != null) Positioned(right: 16, child: trailing!),
+            ],
+          ),
         ),
       ),
     );
