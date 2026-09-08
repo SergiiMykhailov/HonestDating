@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
@@ -8,7 +9,9 @@ import 'package:honest_dating/ui/widgets/app_form_controls.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
 class AgeEligibilityScreen extends StatefulWidget {
-  const AgeEligibilityScreen({super.key});
+  const AgeEligibilityScreen({super.key, required this.profileSetupRepository});
+
+  final BaseProfileSetupRepository profileSetupRepository;
 
   @override
   State<AgeEligibilityScreen> createState() => _AgeEligibilityScreenState();
@@ -68,7 +71,18 @@ class _AgeEligibilityScreenState extends State<AgeEligibilityScreen> {
     setState(() => _dateOfBirthText = value);
   }
 
-  void _continueToConsent() {
+  Future<void> _continueToConsent() async {
+    final dateOfBirth = _dateOfBirth;
+    if (dateOfBirth == null) {
+      return;
+    }
+
+    await widget.profileSetupRepository.saveDraft(
+      widget.profileSetupRepository.draft.copyWith(dateOfBirth: dateOfBirth),
+    );
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushNamed(BaseRouter.consent);
   }
 

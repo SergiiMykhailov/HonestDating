@@ -9,6 +9,7 @@ class AppFormField extends StatelessWidget {
     this.controller,
     this.keyboardType,
     this.obscureText = false,
+    this.autofocus = false,
     this.onChanged,
   });
 
@@ -17,6 +18,7 @@ class AppFormField extends StatelessWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final bool obscureText;
+  final bool autofocus;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -35,6 +37,7 @@ class AppFormField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboardType,
           obscureText: obscureText,
+          autofocus: autofocus,
           onChanged: onChanged,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
           placeholder: placeholder,

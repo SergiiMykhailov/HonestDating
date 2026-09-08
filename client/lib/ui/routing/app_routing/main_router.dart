@@ -10,6 +10,7 @@ import 'package:honest_dating/ui/screens/registration/consent_screen.dart';
 import 'package:honest_dating/ui/screens/registration/identity_verification_screen.dart';
 import 'package:honest_dating/ui/screens/registration/legal_document_placeholder_screen.dart';
 import 'package:honest_dating/ui/screens/registration/phone_verification_screen.dart';
+import 'package:honest_dating/ui/screens/registration/profile_setup_screen.dart';
 import 'package:honest_dating/ui/screens/registration/verification_code_screen.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
 
@@ -57,7 +58,10 @@ class MainRouter implements BaseRouter {
           case BaseRouter.phoneVerificationCode:
             return const VerificationCodeScreen();
           case BaseRouter.ageEligibility:
-            return const AgeEligibilityScreen();
+            return AgeEligibilityScreen(
+              profileSetupRepository: _repositoriesFactory
+                  .makeProfileSetupRepository(),
+            );
           case BaseRouter.consent:
             return const ConsentScreen();
           case BaseRouter.identityVerification:
@@ -66,10 +70,8 @@ class MainRouter implements BaseRouter {
                   .makeIdentityVerificationRepository(),
             );
           case BaseRouter.profileSetup:
-            return const PlaceholderScreen(
-              title: 'Profile setup',
-              message:
-                  'Your selfie check is complete. Profile setup will be added in the next approved slice.',
+            return ProfileSetupScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
             );
           case BaseRouter.termsOfService:
             return const LegalDocumentPlaceholderScreen(
