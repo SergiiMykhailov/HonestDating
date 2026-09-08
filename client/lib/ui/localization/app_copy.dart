@@ -62,6 +62,26 @@ abstract final class AppCopy {
   static const String identityVerificationBody =
       'A brief selfie check helps keep Honest Dating safe and genuine.';
   static const String identityVerificationPreview =
-      'Flow preview: tap Start selfie check to complete this step. Face verification will be connected later.';
+      'FaceTec Test API is enabled for this iOS debug build. Camera access is needed to continue.';
   static const String identityVerificationAction = 'Start selfie check';
+  static const String identityVerificationStartingAction =
+      'Starting selfie check';
+  static const String identityVerificationCancelled =
+      'The selfie check was cancelled. You can start it again when you are ready.';
+  static const String identityVerificationCameraPermissionDenied =
+      'Camera access is required for the selfie check. Enable it in Settings, then try again.';
+  static const String identityVerificationInitializationFailed =
+      'We could not start the selfie check. Check the local FaceTec Test API configuration, then try again.';
+  static const String identityVerificationNetworkFailed =
+      'We could not reach the FaceTec Test API. Check your connection and try again.';
+  static const String identityVerificationServiceFailed =
+      'The FaceTec Test API could not complete this selfie check. Check its test configuration and try again.';
+  static const String identityVerificationCameraError =
+      'We could not use your camera for the selfie check. Close any app using it, then try again.';
+  static const String identityVerificationLockedOut =
+      'The selfie check is temporarily unavailable. Please wait a moment, then try again.';
+  static const String identityVerificationUnavailable =
+      'Selfie testing is available only in an iOS debug build with the local FaceTec SDK installed.';
+  static const String identityVerificationFailed =
+      'We could not complete the selfie check. Check your connection and try again.';
 }

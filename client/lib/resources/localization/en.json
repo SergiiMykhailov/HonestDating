@@ -44,6 +44,11 @@
   "identity_verification_navigation_title": "Identity check",
   "identity_verification_title": "Let’s verify it’s you",
   "identity_verification_body": "A brief selfie check helps keep Honest Dating safe and genuine.",
-  "identity_verification_preview": "Flow preview: tap Start selfie check to complete this step. Face verification will be connected later.",
-  "identity_verification_action": "Start selfie check"
+  "identity_verification_preview": "FaceTec Test API is enabled for this iOS debug build. Camera access is needed to continue.",
+  "identity_verification_action": "Start selfie check",
+  "identity_verification_starting_action": "Starting selfie check",
+  "identity_verification_cancelled": "The selfie check was cancelled. You can start it again when you are ready.",
+  "identity_verification_camera_permission_denied": "Camera access is required for the selfie check. Enable it in Settings, then try again.",
+  "identity_verification_unavailable": "Selfie testing is available only in an iOS debug build with the local FaceTec SDK installed.",
+  "identity_verification_failed": "We could not complete the selfie check. Check your connection and try again."
 }

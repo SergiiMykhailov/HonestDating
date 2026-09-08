@@ -61,12 +61,15 @@ class MainRouter implements BaseRouter {
           case BaseRouter.consent:
             return const ConsentScreen();
           case BaseRouter.identityVerification:
-            return const IdentityVerificationScreen();
+            return IdentityVerificationScreen(
+              repository: _repositoriesFactory
+                  .makeIdentityVerificationRepository(),
+            );
           case BaseRouter.profileSetup:
             return const PlaceholderScreen(
               title: 'Profile setup',
               message:
-                  'Your selfie check is complete in this flow preview. Profile setup will be added in the next approved slice.',
+                  'Your selfie check is complete. Profile setup will be added in the next approved slice.',
             );
           case BaseRouter.termsOfService:
             return const LegalDocumentPlaceholderScreen(

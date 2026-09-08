@@ -45,6 +45,28 @@ Runner target at build time. Add `android/app/google-services.json` before
 running the Android app; its Firebase app must use the `com.honestdating`
 application ID.
 
+## FaceTec Test API (iOS Debug only)
+
+The identity-check screen uses FaceTec's iOS Device SDK and Test API in Debug
+builds only. This integration is for consenting development testing only; it
+does not persist captures, FaceMaps, or verification results.
+
+Keep the FaceTec SDK download and configuration in the ignored `.facetec/`
+directory:
+
+```text
+.facetec/
+  iOS/
+    FaceTecSDK.xcframework
+    FaceTecSDKForDevelopment.xcframework
+  test-config.json
+```
+
+`test-config.json` must contain `deviceKeyIdentifier` and `testApiBaseUrl`.
+The Debug build copies that local file into the signed app bundle at build time.
+Do not commit the SDKs, this file, or any FaceTec credentials. Android remains
+unavailable until its Device SDK is added in a separate change.
+
 ## Run
 
 ```bash

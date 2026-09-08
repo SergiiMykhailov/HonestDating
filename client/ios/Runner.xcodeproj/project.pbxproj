@@ -14,6 +14,9 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A1E0C72568C3EAB890899A35 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B112798BEDE5582C277FFFE /* Pods_Runner.framework */; };
+		FA7E0000000000000000000001 /* FaceTecBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7E0000000000000000000004 /* FaceTecBridge.swift */; };
+		FA7E0000000000000000000002 /* FaceTecSDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA7E0000000000000000000005 /* FaceTecSDK.xcframework */; };
+		FA7E0000000000000000000003 /* FaceTecSDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA7E0000000000000000000005 /* FaceTecSDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FBC000000000000000000001 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FBC000000000000000000002 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +27,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				FA7E0000000000000000000003 /* FaceTecSDK.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -47,6 +51,8 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FA7E0000000000000000000004 /* FaceTecBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceTecBridge.swift; sourceTree = "<group>"; };
+		FA7E0000000000000000000005 /* FaceTecSDK.xcframework */ = {isa = PBXFileReference; explicitFileType = wrapper.xcframework; path = "../.facetec/iOS/FaceTecSDK.xcframework"; sourceTree = "<group>"; };
 		F3FBD6E854CE0B16AEB2BFCC /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		FBC000000000000000000002 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Firebase/Staging/GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -57,6 +63,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1E0C72568C3EAB890899A35 /* Pods_Runner.framework in Frameworks */,
+				FA7E0000000000000000000002 /* FaceTecSDK.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				7B112798BEDE5582C277FFFE /* Pods_Runner.framework */,
+				FA7E0000000000000000000005 /* FaceTecSDK.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -112,6 +120,7 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				FA7E0000000000000000000004 /* FaceTecBridge.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
@@ -139,7 +148,9 @@
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
+				FA7E0000000000000000000006 /* Bundle FaceTec Test Configuration */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				FA7E0000000000000000000007 /* Swap FaceTec Development Framework */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				FB4E8152A923977EE9378559 /* [CP] Embed Pods Frameworks */,
 			);
@@ -218,6 +229,38 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
 		};
+		FA7E0000000000000000000006 /* Bundle FaceTec Test Configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/../.facetec/test-config.json",
+			);
+			name = "Bundle FaceTec Test Configuration";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FaceTecTestConfiguration.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\n[[ \"${CONFIGURATION}\" == \"Debug\" ]] || exit 0\n\nCONFIGURATION_FILE=\"${SRCROOT}/../.facetec/test-config.json\"\nOUTPUT_FILE=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FaceTecTestConfiguration.plist\"\n\nif [[ ! -f \"$CONFIGURATION_FILE\" ]]; then\n  echo \"error: FaceTec test configuration is missing.\" >&2\n  exit 1\nfi\n\n/usr/bin/plutil -convert binary1 -o \"$OUTPUT_FILE\" \"$CONFIGURATION_FILE\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FA7E0000000000000000000007 /* Swap FaceTec Development Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Swap FaceTec Development Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\n[[ \"${USE_FACETEC_DEVELOPMENT_FRAMEWORK:-NO}\" == \"YES\" ]] || exit 0\n\nDEVELOPMENT_FRAMEWORK=\"${SRCROOT}/../.facetec/iOS/FaceTecSDKForDevelopment.xcframework\"\nEMBEDDED_FRAMEWORK=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FaceTecSDK.framework\"\n\nif [[ ! -d \"$EMBEDDED_FRAMEWORK\" ]]; then\n  echo \"error: FaceTecSDK.framework was not embedded.\" >&2\n  exit 1\nfi\n\nsh \"$EMBEDDED_FRAMEWORK/swap-development-framework.sh\" \"$DEVELOPMENT_FRAMEWORK\"\n";
+			showEnvVarsInLog = 0;
+		};
 		5B5D8DC42B7227ED95959EF3 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -280,6 +323,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				FA7E0000000000000000000001 /* FaceTecBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -367,6 +411,10 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WUVR239J8X;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../.facetec/iOS",
+				);
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -506,6 +554,10 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WUVR239J8X;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../.facetec/iOS",
+				);
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -522,6 +574,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				USE_FACETEC_DEVELOPMENT_FRAMEWORK = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -535,6 +588,10 @@
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = WUVR239J8X;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../.facetec/iOS",
+				);
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (

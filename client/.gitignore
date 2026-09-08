@@ -47,3 +47,6 @@ app.*.map.json
 # Firebase app configuration is supplied locally per environment.
 ios/Runner/Firebase/**/GoogleService-Info.plist
 android/app/google-services.json
+
+# FaceTec device SDKs and Test API credentials are local development material.
+.facetec/
