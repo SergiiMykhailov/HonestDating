@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/models/profile_setup_draft.dart';
 import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
+import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/registration/bloc/profile_setup_bloc.dart';
 import 'package:honest_dating/ui/widgets/app_action_button.dart';
 import 'package:honest_dating/ui/widgets/app_feedback_card.dart';
@@ -10,15 +11,20 @@ import 'package:honest_dating/ui/widgets/app_form_controls.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
 class ProfileSetupScreen extends StatelessWidget {
-  const ProfileSetupScreen({super.key, required this.repository});
+  const ProfileSetupScreen({
+    super.key,
+    required this.repository,
+    this.step = ProfileSetupStep.firstName,
+  });
 
   final BaseProfileSetupRepository repository;
+  final ProfileSetupStep step;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProfileSetupBloc>(
       create: (BuildContext context) =>
-          ProfileSetupBloc(repository: repository),
+          ProfileSetupBloc(repository: repository, step: step),
       child: const _ProfileSetupFlow(),
     );
   }
@@ -61,24 +67,27 @@ class _ProfileSetupFlowState extends State<_ProfileSetupFlow> {
       backgroundColor: AppColors.canvas,
       child: BlocConsumer<ProfileSetupBloc, ProfileSetupState>(
         listenWhen: (ProfileSetupState previous, ProfileSetupState current) =>
-            previous.step != current.step,
+            previous.nextStep != current.nextStep ||
+            previous.isCompleted != current.isCompleted,
         listener: (BuildContext context, ProfileSetupState state) {
-          _syncTextController(state);
+          if (state.nextStep case final ProfileSetupStep nextStep) {
+            Navigator.of(
+              context,
+            ).pushNamed(BaseRouter.profileSetup, arguments: nextStep);
+            return;
+          }
+          if (state.isCompleted) {
+            Navigator.of(context).pushNamed(BaseRouter.profileSetupComplete);
+          }
         },
         builder: (BuildContext context, ProfileSetupState state) {
-          if (state.isCompleted) {
-            return _ProfileDetailsSavedView(
-              onBack: () => Navigator.of(context).pop(),
-            );
-          }
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppNavigationBar(
                 title: 'Create profile',
                 leading: _BackButton(
-                  onPressed: () => _onBackPressed(context, state),
+                  onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
               Expanded(
@@ -92,15 +101,11 @@ class _ProfileSetupFlowState extends State<_ProfileSetupFlow> {
                       const SizedBox(height: 20),
                       _FlowProgress(step: state.step),
                       const SizedBox(height: 40),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 180),
-                        child: _StepContent(
-                          key: ValueKey<ProfileSetupStep>(state.step),
-                          state: state,
-                          firstNameController: _firstNameController,
-                          lastNameController: _lastNameController,
-                          heightController: _heightController,
-                        ),
+                      _StepContent(
+                        state: state,
+                        firstNameController: _firstNameController,
+                        lastNameController: _lastNameController,
+                        heightController: _heightController,
                       ),
                     ],
                   ),
@@ -130,14 +135,6 @@ class _ProfileSetupFlowState extends State<_ProfileSetupFlow> {
     );
   }
 
-  void _onBackPressed(BuildContext context, ProfileSetupState state) {
-    if (state.step == ProfileSetupStep.firstName) {
-      Navigator.of(context).pop();
-      return;
-    }
-    context.read<ProfileSetupBloc>().add(const ProfileSetupBackRequested());
-  }
-
   void _syncTextController(ProfileSetupState state) {
     switch (state.step) {
       case ProfileSetupStep.firstName:
@@ -154,7 +151,6 @@ class _ProfileSetupFlowState extends State<_ProfileSetupFlow> {
 
 class _StepContent extends StatelessWidget {
   const _StepContent({
-    super.key,
     required this.state,
     required this.firstNameController,
     required this.lastNameController,
@@ -547,74 +543,75 @@ class _FlowProgress extends StatelessWidget {
   }
 }
 
-class _ProfileDetailsSavedView extends StatelessWidget {
-  const _ProfileDetailsSavedView({required this.onBack});
-
-  final VoidCallback onBack;
+class ProfileSetupCompletionScreen extends StatelessWidget {
+  const ProfileSetupCompletionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppNavigationBar(
-          title: 'Profile details',
-          leading: _BackButton(onPressed: onBack),
-        ),
-        Expanded(
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const AppSetupProgress(currentStep: 5, totalSteps: 6),
-                  const Spacer(),
-                  const Center(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppColors.coralSoft,
-                        shape: BoxShape.circle,
-                      ),
-                      child: SizedBox(
-                        width: 104,
-                        height: 104,
-                        child: Icon(
-                          CupertinoIcons.check_mark_circled_solid,
-                          size: 58,
-                          color: AppColors.coral,
+    return CupertinoPageScaffold(
+      backgroundColor: AppColors.canvas,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppNavigationBar(
+            title: 'Profile details',
+            leading: _BackButton(onPressed: () => Navigator.of(context).pop()),
+          ),
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const AppSetupProgress(currentStep: 5, totalSteps: 6),
+                    const Spacer(),
+                    const Center(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.coralSoft,
+                          shape: BoxShape.circle,
+                        ),
+                        child: SizedBox(
+                          width: 104,
+                          height: 104,
+                          child: Icon(
+                            CupertinoIcons.check_mark_circled_solid,
+                            size: 58,
+                            color: AppColors.coral,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 28),
-                  const Text(
-                    'Profile details saved',
-                    style: TextStyle(
-                      color: AppColors.ink,
-                      fontSize: 30,
-                      height: 1.1,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.7,
+                    const SizedBox(height: 28),
+                    const Text(
+                      'Profile details saved',
+                      style: TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 30,
+                        height: 1.1,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.7,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Photos, About Me, and interests are the next required registration slices. Discover remains locked until they are complete.',
-                    style: TextStyle(
-                      color: AppColors.mutedInk,
-                      fontSize: 16,
-                      height: 1.4,
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Photos, About Me, and interests are the next required registration slices. Discover remains locked until they are complete.',
+                      style: TextStyle(
+                        color: AppColors.mutedInk,
+                        fontSize: 16,
+                        height: 1.4,
+                      ),
                     ),
-                  ),
-                  const Spacer(flex: 2),
-                ],
+                    const Spacer(flex: 2),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

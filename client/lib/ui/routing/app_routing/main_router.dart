@@ -10,6 +10,7 @@ import 'package:honest_dating/ui/screens/registration/consent_screen.dart';
 import 'package:honest_dating/ui/screens/registration/identity_verification_screen.dart';
 import 'package:honest_dating/ui/screens/registration/legal_document_placeholder_screen.dart';
 import 'package:honest_dating/ui/screens/registration/phone_verification_screen.dart';
+import 'package:honest_dating/ui/screens/registration/bloc/profile_setup_bloc.dart';
 import 'package:honest_dating/ui/screens/registration/profile_setup_screen.dart';
 import 'package:honest_dating/ui/screens/registration/verification_code_screen.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
@@ -72,7 +73,12 @@ class MainRouter implements BaseRouter {
           case BaseRouter.profileSetup:
             return ProfileSetupScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
+              step: settings.arguments is ProfileSetupStep
+                  ? settings.arguments! as ProfileSetupStep
+                  : ProfileSetupStep.firstName,
             );
+          case BaseRouter.profileSetupComplete:
+            return const ProfileSetupCompletionScreen();
           case BaseRouter.termsOfService:
             return const LegalDocumentPlaceholderScreen(
               title: AppCopy.consentTermsLabel,

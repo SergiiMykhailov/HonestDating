@@ -63,21 +63,17 @@ class ProfileSetupMultiChoiceToggled extends ProfileSetupEvent {
   final String value;
 }
 
-class ProfileSetupBackRequested extends ProfileSetupEvent {
-  const ProfileSetupBackRequested();
-}
-
 class ProfileSetupState {
   const ProfileSetupState({
     required this.draft,
-    this.step = ProfileSetupStep.firstName,
-    this.showValidation = false,
+    required this.step,
+    this.nextStep,
     this.isCompleted = false,
   });
 
   final ProfileSetupDraft draft;
   final ProfileSetupStep step;
-  final bool showValidation;
+  final ProfileSetupStep? nextStep;
   final bool isCompleted;
 
   bool get requiresTextEntry =>
@@ -93,19 +89,6 @@ class ProfileSetupState {
 
   bool get requiresContinue =>
       requiresTextEntry || requiresMultipleChoices || isVerifiedDetails;
-
-  String get textValue {
-    switch (step) {
-      case ProfileSetupStep.firstName:
-        return draft.firstName;
-      case ProfileSetupStep.lastName:
-        return draft.lastName;
-      case ProfileSetupStep.height:
-        return draft.heightCentimeters;
-      default:
-        return '';
-    }
-  }
 
   bool get canContinue {
     switch (step) {
@@ -126,30 +109,29 @@ class ProfileSetupState {
     }
   }
 
-  ProfileSetupState copyWith({
-    ProfileSetupDraft? draft,
-    ProfileSetupStep? step,
-    bool? showValidation,
-    bool? isCompleted,
-  }) {
-    return ProfileSetupState(
-      draft: draft ?? this.draft,
-      step: step ?? this.step,
-      showValidation: showValidation ?? this.showValidation,
-      isCompleted: isCompleted ?? this.isCompleted,
-    );
+  ProfileSetupState withDraft(ProfileSetupDraft draft) {
+    return ProfileSetupState(draft: draft, step: step);
+  }
+
+  ProfileSetupState withNextStep(ProfileSetupStep nextStep) {
+    return ProfileSetupState(draft: draft, step: step, nextStep: nextStep);
+  }
+
+  ProfileSetupState completed() {
+    return ProfileSetupState(draft: draft, step: step, isCompleted: true);
   }
 }
 
 class ProfileSetupBloc extends Bloc<ProfileSetupEvent, ProfileSetupState> {
-  ProfileSetupBloc({required BaseProfileSetupRepository repository})
-    : _repository = repository,
-      super(ProfileSetupState(draft: repository.draft)) {
+  ProfileSetupBloc({
+    required BaseProfileSetupRepository repository,
+    required ProfileSetupStep step,
+  }) : _repository = repository,
+       super(ProfileSetupState(draft: repository.draft, step: step)) {
     on<ProfileSetupTextChanged>(_onTextChanged);
     on<ProfileSetupContinueRequested>(_onContinueRequested);
     on<ProfileSetupSingleChoiceSelected>(_onSingleChoiceSelected);
     on<ProfileSetupMultiChoiceToggled>(_onMultiChoiceToggled);
-    on<ProfileSetupBackRequested>(_onBackRequested);
   }
 
   final BaseProfileSetupRepository _repository;
@@ -176,7 +158,6 @@ class ProfileSetupBloc extends Bloc<ProfileSetupEvent, ProfileSetupState> {
     Emitter<ProfileSetupState> emit,
   ) async {
     if (!state.canContinue) {
-      emit(state.copyWith(showValidation: true));
       return;
     }
     await _advance(emit);
@@ -187,8 +168,7 @@ class ProfileSetupBloc extends Bloc<ProfileSetupEvent, ProfileSetupState> {
     Emitter<ProfileSetupState> emit,
   ) async {
     final draft = _draftWithSingleChoice(event.value);
-    await _repository.saveDraft(draft);
-    emit(state.copyWith(draft: draft, showValidation: false));
+    await _saveAndEmit(emit, draft);
     await _advance(emit);
   }
 
@@ -206,26 +186,6 @@ class ProfileSetupBloc extends Bloc<ProfileSetupEvent, ProfileSetupState> {
       _ => state.draft,
     };
     await _saveAndEmit(emit, draft);
-  }
-
-  void _onBackRequested(
-    ProfileSetupBackRequested event,
-    Emitter<ProfileSetupState> emit,
-  ) {
-    final previousIndex =
-        state.step == ProfileSetupStep.socialOrientation &&
-            state.draft.religion == 'No Religion'
-        ? ProfileSetupStep.religion.index
-        : state.step.index - 1;
-    if (previousIndex < 0) {
-      return;
-    }
-    emit(
-      state.copyWith(
-        step: ProfileSetupStep.values[previousIndex],
-        showValidation: false,
-      ),
-    );
   }
 
   ProfileSetupDraft _draftWithSingleChoice(String value) {
@@ -320,7 +280,7 @@ class ProfileSetupBloc extends Bloc<ProfileSetupEvent, ProfileSetupState> {
     ProfileSetupDraft draft,
   ) async {
     await _repository.saveDraft(draft);
-    emit(state.copyWith(draft: draft, showValidation: false));
+    emit(state.withDraft(draft));
   }
 
   Future<void> _advance(Emitter<ProfileSetupState> emit) async {
@@ -331,15 +291,9 @@ class ProfileSetupBloc extends Bloc<ProfileSetupEvent, ProfileSetupState> {
         : state.step.index + 1;
     if (nextIndex >= ProfileSetupStep.values.length) {
       await _repository.saveDraft(state.draft);
-      emit(state.copyWith(isCompleted: true, showValidation: false));
+      emit(state.completed());
       return;
     }
-
-    emit(
-      state.copyWith(
-        step: ProfileSetupStep.values[nextIndex],
-        showValidation: false,
-      ),
-    );
+    emit(state.withNextStep(ProfileSetupStep.values[nextIndex]));
   }
 }

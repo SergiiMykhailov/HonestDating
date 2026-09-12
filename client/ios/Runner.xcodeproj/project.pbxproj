@@ -258,7 +258,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\n[[ \"${USE_FACETEC_DEVELOPMENT_FRAMEWORK:-NO}\" == \"YES\" ]] || exit 0\n\nDEVELOPMENT_FRAMEWORK=\"${SRCROOT}/../.facetec/iOS/FaceTecSDKForDevelopment.xcframework\"\nEMBEDDED_FRAMEWORK=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FaceTecSDK.framework\"\n\nif [[ ! -d \"$EMBEDDED_FRAMEWORK\" ]]; then\n  echo \"error: FaceTecSDK.framework was not embedded.\" >&2\n  exit 1\nfi\n\nsh \"$EMBEDDED_FRAMEWORK/swap-development-framework.sh\" \"$DEVELOPMENT_FRAMEWORK\"\n";
+			shellScript = "set -euo pipefail\n\n[[ \"${CONFIGURATION}\" == \"Debug\" ]] || exit 0\n[[ \"${PLATFORM_NAME}\" == \"iphoneos\" ]] || exit 0\n[[ \"${USE_FACETEC_DEVELOPMENT_FRAMEWORK:-NO}\" == \"YES\" ]] || exit 0\n\nDEVELOPMENT_FRAMEWORK=\"${SRCROOT}/../.facetec/iOS/FaceTecSDKForDevelopment.xcframework\"\nEMBEDDED_FRAMEWORK=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FaceTecSDK.framework\"\n\nif [[ ! -d \"$EMBEDDED_FRAMEWORK\" ]]; then\n  echo \"error: FaceTecSDK.framework was not embedded.\" >&2\n  exit 1\nfi\n\nsh \"$EMBEDDED_FRAMEWORK/swap-development-framework.sh\" \"$DEVELOPMENT_FRAMEWORK\"\n";
 			showEnvVarsInLog = 0;
 		};
 		5B5D8DC42B7227ED95959EF3 /* [CP] Check Pods Manifest.lock */ = {

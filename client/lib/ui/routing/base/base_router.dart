@@ -16,6 +16,8 @@ abstract interface class BaseRouter {
   static const String identityVerification =
       '/registration/identity-verification';
   static const String profileSetup = '/registration/profile-setup';
+  static const String profileSetupComplete =
+      '/registration/profile-setup/complete';
   static const String termsOfService = '/legal/terms-of-service';
   static const String privacyPolicy = '/legal/privacy-policy';
 

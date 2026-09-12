@@ -54,6 +54,11 @@ final class FaceTecBridge: NSObject {
             return
         }
 
+#if targetEnvironment(simulator)
+        result(["outcome": "verified", "verificationMode": "simulatorSkipped"])
+        return
+#endif
+
         guard let configuration = FaceTecTestConfiguration.load() else {
             result(FlutterError(
                 code: "test_configuration_unavailable",

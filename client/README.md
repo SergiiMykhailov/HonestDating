@@ -67,6 +67,10 @@ The Debug build copies that local file into the signed app bundle at build time.
 Do not commit the SDKs, this file, or any FaceTec credentials. Android remains
 unavailable until its Device SDK is added in a separate change.
 
+On an iOS Simulator, the native bridge deliberately skips FaceTec and returns a
+successful verification outcome so the registration flow can be previewed. A
+physical iOS device still runs the FaceTec Test API check.
+
 ## Run
 
 ```bash
