@@ -3,7 +3,6 @@ import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/widgets/app_action_button.dart';
-import 'package:honest_dating/ui/widgets/app_feedback_card.dart';
 import 'package:honest_dating/ui/widgets/app_form_controls.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
@@ -111,10 +110,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const AppFeedbackCard(
-                    message: AppCopy.phoneVerificationPreview,
-                  ),
                   const SizedBox(height: 28),
                   AppSelectionRow(
                     label: AppCopy.phoneVerificationCountryLabel,
@@ -160,13 +155,13 @@ class _CountryPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: AppColors.canvas,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.canvas,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
         child: SizedBox(
           height: 320,
           child: Column(

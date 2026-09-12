@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:honest_dating/config/app_colors.dart';
-import 'package:honest_dating/ui/widgets/app_feedback_card.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
 class LegalDocumentPlaceholderScreen extends StatelessWidget {
@@ -40,8 +39,15 @@ class LegalDocumentPlaceholderScreen extends StatelessWidget {
                       letterSpacing: -0.7,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  AppFeedbackCard(message: placeholder),
+                  const SizedBox(height: 12),
+                  Text(
+                    placeholder,
+                    style: const TextStyle(
+                      color: AppColors.mutedInk,
+                      fontSize: 16,
+                      height: 1.4,
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -81,11 +81,14 @@ class _IdentityVerificationView extends StatelessWidget {
                             height: 1.4,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        AppFeedbackCard(
-                          message: _feedbackMessage(state),
-                          tone: _feedbackTone(state),
-                        ),
+                        if (state.phase ==
+                            IdentityVerificationPhase.needsRetry) ...[
+                          const SizedBox(height: 24),
+                          AppFeedbackCard(
+                            message: _feedbackMessage(state),
+                            tone: AppFeedbackTone.error,
+                          ),
+                        ],
                         const SizedBox(height: 40),
                         const Center(
                           child: DecoratedBox(
@@ -157,14 +160,8 @@ class _IdentityVerificationView extends StatelessWidget {
         return AppCopy.identityVerificationFailed;
       case IdentityVerificationOutcome.verified:
       case null:
-        return AppCopy.identityVerificationPreview;
+        return '';
     }
-  }
-
-  AppFeedbackTone _feedbackTone(IdentityVerificationState state) {
-    return state.phase == IdentityVerificationPhase.needsRetry
-        ? AppFeedbackTone.error
-        : AppFeedbackTone.information;
   }
 }
 

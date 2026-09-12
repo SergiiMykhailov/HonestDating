@@ -3,7 +3,6 @@ import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/widgets/app_action_button.dart';
-import 'package:honest_dating/ui/widgets/app_feedback_card.dart';
 import 'package:honest_dating/ui/widgets/app_form_controls.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
@@ -62,8 +61,6 @@ class _ConsentScreenState extends State<ConsentScreen> {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const AppFeedbackCard(message: AppCopy.consentPreview),
                   const SizedBox(height: 28),
                   _ConsentToggle(
                     label: AppCopy.consentTermsLabel,

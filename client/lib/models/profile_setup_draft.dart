@@ -32,6 +32,10 @@ class ProfileSetupDraft {
     this.educationLevel = '',
     this.currentEducation = '',
     this.employment = '',
+    this.mainPhotoPath,
+    this.galleryPhotoPaths = const <String>[],
+    this.aboutMe = '',
+    this.interests = const <String>[],
   });
 
   final String firstName;
@@ -66,6 +70,10 @@ class ProfileSetupDraft {
   final String educationLevel;
   final String currentEducation;
   final String employment;
+  final String? mainPhotoPath;
+  final List<String> galleryPhotoPaths;
+  final String aboutMe;
+  final List<String> interests;
 
   int? get age {
     final dateOfBirth = this.dateOfBirth;
@@ -202,6 +210,12 @@ class ProfileSetupDraft {
       isIdentityComplete &&
       isLifestyleComplete;
 
+  bool get isReadyForMobileCompletion =>
+      isComplete &&
+      mainPhotoPath != null &&
+      aboutMe.trim().isNotEmpty &&
+      interests.isNotEmpty;
+
   ProfileSetupDraft copyWith({
     String? firstName,
     String? lastName,
@@ -235,6 +249,10 @@ class ProfileSetupDraft {
     String? educationLevel,
     String? currentEducation,
     String? employment,
+    String? mainPhotoPath,
+    List<String>? galleryPhotoPaths,
+    String? aboutMe,
+    List<String>? interests,
   }) {
     return ProfileSetupDraft(
       firstName: firstName ?? this.firstName,
@@ -270,6 +288,10 @@ class ProfileSetupDraft {
       educationLevel: educationLevel ?? this.educationLevel,
       currentEducation: currentEducation ?? this.currentEducation,
       employment: employment ?? this.employment,
+      mainPhotoPath: mainPhotoPath ?? this.mainPhotoPath,
+      galleryPhotoPaths: galleryPhotoPaths ?? this.galleryPhotoPaths,
+      aboutMe: aboutMe ?? this.aboutMe,
+      interests: interests ?? this.interests,
     );
   }
 }

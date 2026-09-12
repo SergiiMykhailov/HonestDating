@@ -19,10 +19,13 @@ PODS:
   - "GoogleUtilities/NSData+zlib (8.1.3)":
     - GoogleUtilities/Privacy
   - GoogleUtilities/Privacy (8.1.3)
+  - image_picker_ios (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
 
 SPEC REPOS:
   trunk:
@@ -36,6 +39,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   Flutter:
     :path: Flutter
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
 
 SPEC CHECKSUMS:
   Firebase: 5523dd53ebe603451b4e1befcd99fa20a5c015cd
@@ -44,6 +49,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 93b2d5f9e184c6818a04433891c358b0720a6a38
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   GoogleUtilities: 4e0c2ad9fa0d0d18b5c4df8bf57b461cba35b0bb
+  image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
 
 PODFILE CHECKSUM: 0b61a0cc7a05cfbc615890fb81b8e5475630d91d
 

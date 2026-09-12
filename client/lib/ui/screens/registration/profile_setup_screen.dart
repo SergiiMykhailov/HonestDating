@@ -314,12 +314,6 @@ class _MultipleChoiceStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppFeedbackCard(
-          message: isLanguages
-              ? 'Choose up to three languages, then continue.'
-              : 'Choose any that apply. No Restrictions cannot be combined with another choice.',
-        ),
-        const SizedBox(height: 18),
         ..._optionsFor(state.step).map((String option) {
           final isSelected = selected.contains(option);
           final cannotSelect =
@@ -597,14 +591,22 @@ class ProfileSetupCompletionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Photos, About Me, and interests are the next required registration slices. Discover remains locked until they are complete.',
+                      'Next, add a main photo, tell us about yourself, and choose your interests.',
                       style: TextStyle(
                         color: AppColors.mutedInk,
                         fontSize: 16,
                         height: 1.4,
                       ),
                     ),
-                    const Spacer(flex: 2),
+                    const Spacer(),
+                    AppPrimaryButton(
+                      label: 'Continue to photos',
+                      onPressed: () {
+                        Navigator.of(
+                          context,
+                        ).pushNamed(BaseRouter.profilePhoto);
+                      },
+                    ),
                   ],
                 ),
               ),

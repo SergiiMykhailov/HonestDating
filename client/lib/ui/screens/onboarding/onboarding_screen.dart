@@ -240,16 +240,11 @@ class _AuthenticationPanel extends StatelessWidget {
             final pendingProvider = state is OnboardingSocialSignInInProgress
                 ? state.provider
                 : null;
-            final feedback = switch (state) {
-              OnboardingProviderUnavailable(:final provider) =>
-                '${provider.label} sign-in will be available once it has been configured.',
+            final failure = switch (state) {
               OnboardingAuthenticationFailure(:final provider) =>
                 'We could not start ${provider.label} sign-in. Please try again.',
               _ => null,
             };
-            final feedbackTone = state is OnboardingAuthenticationFailure
-                ? AppFeedbackTone.error
-                : AppFeedbackTone.information;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -296,11 +291,11 @@ class _AuthenticationPanel extends StatelessWidget {
                         )
                       : null,
                 ),
-                if (feedback != null) ...[
+                if (failure != null) ...[
                   const SizedBox(height: 16),
                   AppFeedbackCard(
-                    message: feedback,
-                    tone: feedbackTone,
+                    message: failure,
+                    tone: AppFeedbackTone.error,
                     onDismissed: () => context.read<OnboardingScreenBloc>().add(
                       const OnboardingFeedbackDismissed(),
                     ),

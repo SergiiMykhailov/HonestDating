@@ -39,6 +39,12 @@ format only when the user is at least 18, then opens the consent placeholder.
 The consent preview enables Continue only after both document switches are on,
 then opens the identity-verification placeholder. It stores no consent record.
 
+After the profile-detail flow, registration continues through an on-device
+photo-library picker, required About Me text, semicolon-separated interests,
+and a final review screen. Completing this path opens the local Discover
+preview only. Photos, profile data, interest interpretation, and verification
+results are not uploaded or persisted until the backend slice is implemented.
+
 The iOS Firebase configuration is supplied locally at
 `ios/Runner/Firebase/Staging/GoogleService-Info.plist` and is copied into the
 Runner target at build time. Add `android/app/google-services.json` before

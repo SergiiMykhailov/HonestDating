@@ -16,7 +16,6 @@ class AppNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topInset = MediaQuery.paddingOf(context).top;
-
     return Container(
       width: double.infinity,
       height: topInset + 68,

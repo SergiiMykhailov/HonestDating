@@ -57,14 +57,14 @@ class _AgeEligibilityScreenState extends State<AgeEligibilityScreen> {
 
   bool get _isUnderage => _dateOfBirth != null && !_isAgeEligible;
 
-  String get _feedbackMessage {
+  String get _errorMessage {
     if (_hasInvalidDate) {
       return AppCopy.ageEligibilityInvalidDate;
     }
     if (_isUnderage) {
       return AppCopy.ageEligibilityUnderage;
     }
-    return AppCopy.ageEligibilityPreview;
+    return '';
   }
 
   void _onDateOfBirthChanged(String value) {
@@ -124,13 +124,13 @@ class _AgeEligibilityScreenState extends State<AgeEligibilityScreen> {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  AppFeedbackCard(
-                    message: _feedbackMessage,
-                    tone: _hasInvalidDate || _isUnderage
-                        ? AppFeedbackTone.error
-                        : AppFeedbackTone.information,
-                  ),
+                  if (_hasInvalidDate || _isUnderage) ...[
+                    const SizedBox(height: 24),
+                    AppFeedbackCard(
+                      message: _errorMessage,
+                      tone: AppFeedbackTone.error,
+                    ),
+                  ],
                   const SizedBox(height: 28),
                   AppFormField(
                     label: AppCopy.ageEligibilityDateLabel,

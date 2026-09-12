@@ -73,15 +73,13 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  AppFeedbackCard(
-                    message: _hasInvalidCode
-                        ? AppCopy.verificationCodeInvalid
-                        : AppCopy.verificationCodePreview,
-                    tone: _hasInvalidCode
-                        ? AppFeedbackTone.error
-                        : AppFeedbackTone.information,
-                  ),
+                  if (_hasInvalidCode) ...[
+                    const SizedBox(height: 24),
+                    const AppFeedbackCard(
+                      message: AppCopy.verificationCodeInvalid,
+                      tone: AppFeedbackTone.error,
+                    ),
+                  ],
                   const SizedBox(height: 28),
                   const Padding(
                     padding: EdgeInsets.only(left: 14, bottom: 7),
