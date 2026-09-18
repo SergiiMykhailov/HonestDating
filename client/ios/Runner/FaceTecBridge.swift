@@ -13,6 +13,7 @@ final class FaceTecBridge: NSObject {
     private var initializationProcessor: FaceTecTestSessionProcessor?
     private var livenessProcessor: FaceTecTestSessionProcessor?
     private var pendingResult: FlutterResult?
+    private var backendTransport: FaceTecBackendSessionTransport?
 
     func register(
         messenger: FlutterBinaryMessenger,
@@ -39,12 +40,15 @@ final class FaceTecBridge: NSObject {
                 return
             }
 
-            self.startLivenessCheck(result: result)
+            self.startLivenessCheck(arguments: call.arguments, result: result)
         }
         self.channel = channel
     }
 
-    private func startLivenessCheck(result: @escaping FlutterResult) {
+    private func startLivenessCheck(
+        arguments: Any?,
+        result: @escaping FlutterResult
+    ) {
         guard pendingResult == nil else {
             result(FlutterError(
                 code: "session_in_progress",
@@ -59,6 +63,30 @@ final class FaceTecBridge: NSObject {
         return
 #endif
 
+        guard let requestedTransport = FaceTecBackendSessionTransport.from(
+            arguments: arguments
+        ) else {
+            if FaceTecBackendSessionTransport.isRequested(arguments: arguments) {
+                result(FlutterError(
+                    code: "server_transport_unavailable",
+                    message: "Secure selfie verification transport is unavailable.",
+                    details: nil
+                ))
+                return
+            }
+            return startWithConfiguration(
+                backendTransport: nil,
+                result: result
+            )
+        }
+        startWithConfiguration(backendTransport: requestedTransport, result: result)
+    }
+
+    private func startWithConfiguration(
+        backendTransport: FaceTecBackendSessionTransport?,
+        result: @escaping FlutterResult
+    ) {
+
         guard let configuration = FaceTecTestConfiguration.load() else {
             result(FlutterError(
                 code: "test_configuration_unavailable",
@@ -70,6 +98,7 @@ final class FaceTecBridge: NSObject {
 
         pendingResult = result
         self.configuration = configuration
+        self.backendTransport = backendTransport
 
         if let sdkInstance {
             launchLivenessCheck(with: sdkInstance, configuration: configuration)
@@ -103,7 +132,10 @@ final class FaceTecBridge: NSObject {
     private func makeSessionProcessor(
         configuration: FaceTecTestConfiguration
     ) -> FaceTecTestSessionProcessor {
-        FaceTecTestSessionProcessor(configuration: configuration) {
+        FaceTecTestSessionProcessor(
+            configuration: configuration,
+            backendTransport: backendTransport
+        ) {
             [weak self] status,
             requestFailure in
             self?.finish(with: status, requestFailure: requestFailure)
@@ -150,8 +182,43 @@ final class FaceTecBridge: NSObject {
             self.pendingResult = nil
             self.initializationProcessor = nil
             self.livenessProcessor = nil
+            self.backendTransport = nil
             pendingResult(["outcome": outcome])
         }
+    }
+}
+
+// In backend mode these short-lived Firebase headers and the opaque endpoint
+// exist only for the active Device SDK session. The native bridge never stores
+// them, and it never sees a FaceTec server credential.
+private struct FaceTecBackendSessionTransport {
+    let sessionRequestURL: URL
+    let authorization: String
+    let appCheckToken: String
+
+    static func isRequested(arguments: Any?) -> Bool {
+        let values = arguments as? [String: Any]
+        return values?["useBackendTransport"] as? Bool == true
+    }
+
+    static func from(arguments: Any?) -> FaceTecBackendSessionTransport? {
+        guard
+            isRequested(arguments: arguments),
+            let values = arguments as? [String: Any],
+            let endpoint = values["sessionRequestEndpoint"] as? String,
+            let sessionRequestURL = URL(string: endpoint),
+            let authorization = values["authorization"] as? String,
+            authorization.hasPrefix("Bearer "),
+            let appCheckToken = values["appCheckToken"] as? String,
+            !appCheckToken.isEmpty
+        else {
+            return nil
+        }
+        return FaceTecBackendSessionTransport(
+            sessionRequestURL: sessionRequestURL,
+            authorization: authorization,
+            appCheckToken: appCheckToken
+        )
     }
 }
 
@@ -210,15 +277,18 @@ private final class FaceTecTestSessionProcessor: NSObject,
     private static let maximumNetworkAttempts = 4
 
     private let configuration: FaceTecTestConfiguration
+    private let backendTransport: FaceTecBackendSessionTransport?
     private let onExit: (FaceTecSessionStatus, FaceTecTestRequestFailure?) -> Void
     private var activeCallback: FaceTecSessionRequestProcessorCallback?
     private var requestFailure: FaceTecTestRequestFailure?
 
     init(
         configuration: FaceTecTestConfiguration,
+        backendTransport: FaceTecBackendSessionTransport?,
         onExit: @escaping (FaceTecSessionStatus, FaceTecTestRequestFailure?) -> Void
     ) {
         self.configuration = configuration
+        self.backendTransport = backendTransport
         self.onExit = onExit
     }
 
@@ -243,17 +313,30 @@ private final class FaceTecTestSessionProcessor: NSObject,
         sessionRequestCallback: FaceTecSessionRequestProcessorCallback,
         attempt: Int
     ) {
-        var request = URLRequest(url: configuration.testApiBaseUrl)
+        var request = URLRequest(
+            url: backendTransport?.sessionRequestURL ?? configuration.testApiBaseUrl
+        )
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(
-            configuration.deviceKeyIdentifier,
-            forHTTPHeaderField: "X-Device-Key"
-        )
-        request.setValue(
-            FaceTec.sdk.getTestingAPIHeader(),
-            forHTTPHeaderField: "X-Testing-API-Header"
-        )
+        if let backendTransport {
+            request.setValue(
+                backendTransport.authorization,
+                forHTTPHeaderField: "Authorization"
+            )
+            request.setValue(
+                backendTransport.appCheckToken,
+                forHTTPHeaderField: "X-Firebase-AppCheck"
+            )
+        } else {
+            request.setValue(
+                configuration.deviceKeyIdentifier,
+                forHTTPHeaderField: "X-Device-Key"
+            )
+            request.setValue(
+                FaceTec.sdk.getTestingAPIHeader(),
+                forHTTPHeaderField: "X-Testing-API-Header"
+            )
+        }
 
         guard let body = try? JSONSerialization.data(
             withJSONObject: ["requestBlob": sessionRequestBlob]

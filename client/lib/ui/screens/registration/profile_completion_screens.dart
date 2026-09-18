@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/models/profile_setup_draft.dart';
+import 'package:honest_dating/models/profile_photo_verification.dart';
+import 'package:honest_dating/repositories/base/base_profile_photo_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/registration/bloc/profile_photo_bloc.dart';
@@ -14,15 +17,22 @@ import 'package:honest_dating/ui/widgets/app_form_controls.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
 class ProfilePhotosScreen extends StatelessWidget {
-  const ProfilePhotosScreen({super.key, required this.repository});
+  const ProfilePhotosScreen({
+    super.key,
+    required this.repository,
+    required this.verificationRepository,
+  });
 
   final BaseProfileSetupRepository repository;
+  final BaseProfilePhotoVerificationRepository verificationRepository;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProfilePhotoBloc>(
-      create: (BuildContext context) =>
-          ProfilePhotoBloc(repository: repository),
+      create: (BuildContext context) => ProfilePhotoBloc(
+        repository: repository,
+        verificationRepository: verificationRepository,
+      ),
       child: const _ProfilePhotosFlow(),
     );
   }
@@ -39,8 +49,9 @@ class _ProfilePhotosFlow extends StatelessWidget {
         listenWhen: (ProfilePhotoState previous, ProfilePhotoState current) =>
             previous.navigationRequest != current.navigationRequest,
         listener: (BuildContext context, ProfilePhotoState state) {
-          if (state.navigationRequest > 0) {
-            Navigator.of(context).pushNamed(BaseRouter.profileAboutMe);
+          final session = state.verificationSession;
+          if (state.navigationRequest > 0 && session != null) {
+            unawaited(_openValidation(context, session));
           }
         },
         builder: (BuildContext context, ProfilePhotoState state) {
@@ -84,7 +95,7 @@ class _ProfilePhotosFlow extends StatelessWidget {
                       const SizedBox(height: 28),
                       _MainPhotoCard(
                         path: state.draft.mainPhotoPath,
-                        isLoading: state.isPicking,
+                        isLoading: state.isBusy,
                         onPressed: () {
                           context.read<ProfilePhotoBloc>().add(
                             const ProfileMainPhotoRequested(),
@@ -117,7 +128,7 @@ class _ProfilePhotosFlow extends StatelessWidget {
                               horizontal: 8,
                               vertical: 6,
                             ),
-                            onPressed: state.isPicking
+                            onPressed: state.isBusy
                                 ? null
                                 : () {
                                     context.read<ProfilePhotoBloc>().add(
@@ -164,7 +175,7 @@ class _ProfilePhotosFlow extends StatelessWidget {
                       const SizedBox(height: 28),
                       AppPrimaryButton(
                         label: 'Continue',
-                        isLoading: state.isPicking,
+                        isLoading: state.isUploading,
                         onPressed: state.canContinue
                             ? () {
                                 context.read<ProfilePhotoBloc>().add(
@@ -182,6 +193,18 @@ class _ProfilePhotosFlow extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _openValidation(
+    BuildContext context,
+    ProfilePhotoVerificationSession session,
+  ) async {
+    final shouldReplaceMainPhoto = await Navigator.of(
+      context,
+    ).pushNamed<bool>(BaseRouter.profilePhotoValidation, arguments: session);
+    if (context.mounted && shouldReplaceMainPhoto == true) {
+      context.read<ProfilePhotoBloc>().add(const ProfileMainPhotoRequested());
+    }
   }
 }
 

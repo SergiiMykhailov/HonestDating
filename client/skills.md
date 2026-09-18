@@ -24,5 +24,13 @@
 
 ## Tests
 
-- Do not generate, add, modify, or run automated tests for this project unless the product owner explicitly changes this policy.
-- Do not add a `test/` directory, `flutter_test`, integration-test targets, or platform test targets.
+- The product owner has approved automated regression coverage for Firebase
+  Authentication and Firestore. Keep normal unit tests non-mutating and gate
+  any test that touches a live Firebase project behind an explicit build-time
+  opt-in.
+- Live Firestore tests must create only a timestamped `testData-<timestamp>`
+  root collection, verify one non-sensitive key-value document, and delete it
+  before completing. They must never commit credentials or test against an
+  unintended Firebase project.
+- Do not add unrelated test suites or platform test targets unless the product
+  owner explicitly approves them.

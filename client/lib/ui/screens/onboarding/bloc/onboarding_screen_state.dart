@@ -14,8 +14,21 @@ final class OnboardingSocialSignInInProgress extends OnboardingScreenState {
   final AuthenticationProvider provider;
 }
 
-final class OnboardingProviderUnavailable extends OnboardingScreenState {
-  const OnboardingProviderUnavailable(this.provider);
+final class OnboardingAuthenticated extends OnboardingScreenState {
+  const OnboardingAuthenticated(this.provider);
+
+  final AuthenticationProvider provider;
+}
+
+final class OnboardingProviderConfigurationRequired
+    extends OnboardingScreenState {
+  const OnboardingProviderConfigurationRequired(this.provider);
+
+  final AuthenticationProvider provider;
+}
+
+final class OnboardingDataAccessFailure extends OnboardingScreenState {
+  const OnboardingDataAccessFailure(this.provider);
 
   final AuthenticationProvider provider;
 }

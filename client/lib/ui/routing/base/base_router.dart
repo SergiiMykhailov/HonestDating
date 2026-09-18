@@ -19,6 +19,8 @@ abstract interface class BaseRouter {
   static const String profileSetupComplete =
       '/registration/profile-setup/complete';
   static const String profilePhoto = '/registration/profile-photo';
+  static const String profilePhotoValidation =
+      '/registration/profile-photo-validation';
   static const String profileAboutMe = '/registration/profile-about-me';
   static const String profileInterests = '/registration/profile-interests';
   static const String profileReview = '/registration/profile-review';

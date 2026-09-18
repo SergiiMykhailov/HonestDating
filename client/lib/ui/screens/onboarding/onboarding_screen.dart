@@ -56,37 +56,45 @@ class _OnboardingView extends StatelessWidget {
       ],
     );
 
-    return SafeArea(
-      bottom: false,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (kDebugMode)
-                      Expanded(
-                        child: _TripleTapAdvance(
-                          onTriggered: () {
-                            Navigator.of(
-                              context,
-                            ).pushNamed(BaseRouter.phoneVerification);
-                          },
-                          child: welcomeArea,
-                        ),
-                      )
-                    else
-                      Expanded(child: welcomeArea),
-                    const _AuthenticationPanel(),
-                  ],
+    return BlocListener<OnboardingScreenBloc, OnboardingScreenState>(
+      listenWhen:
+          (OnboardingScreenState previous, OnboardingScreenState next) =>
+              next is OnboardingAuthenticated,
+      listener: (BuildContext context, OnboardingScreenState state) {
+        Navigator.of(context).pushNamed(BaseRouter.phoneVerification);
+      },
+      child: SafeArea(
+        bottom: false,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (kDebugMode)
+                        Expanded(
+                          child: _TripleTapAdvance(
+                            onTriggered: () {
+                              Navigator.of(
+                                context,
+                              ).pushNamed(BaseRouter.phoneVerification);
+                            },
+                            child: welcomeArea,
+                          ),
+                        )
+                      else
+                        Expanded(child: welcomeArea),
+                      const _AuthenticationPanel(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -241,6 +249,10 @@ class _AuthenticationPanel extends StatelessWidget {
                 ? state.provider
                 : null;
             final failure = switch (state) {
+              OnboardingProviderConfigurationRequired(:final provider) =>
+                '${provider.label} sign-in is not configured yet. Please contact support or try another sign-in method.',
+              OnboardingDataAccessFailure() =>
+                'Your account is signed in, but secure profile storage is unavailable. Please try again.',
               OnboardingAuthenticationFailure(:final provider) =>
                 'We could not start ${provider.label} sign-in. Please try again.',
               _ => null,
@@ -275,18 +287,6 @@ class _AuthenticationPanel extends StatelessWidget {
                       ? () => context.read<OnboardingScreenBloc>().add(
                           const OnboardingSocialSignInRequested(
                             AuthenticationProvider.google,
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                AppSocialSignInButton(
-                  provider: AuthenticationProvider.apple,
-                  isLoading: pendingProvider == AuthenticationProvider.apple,
-                  onPressed: pendingProvider == null
-                      ? () => context.read<OnboardingScreenBloc>().add(
-                          const OnboardingSocialSignInRequested(
-                            AuthenticationProvider.apple,
                           ),
                         )
                       : null,

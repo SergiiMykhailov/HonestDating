@@ -1,6 +1,12 @@
 import 'package:honest_dating/models/authentication_provider.dart';
 
-enum AuthenticationStartStatus { providerUnavailable }
+enum AuthenticationStartStatus {
+  authenticated,
+  cancelled,
+  providerConfigurationRequired,
+  dataAccessFailed,
+  failed,
+}
 
 class AuthenticationStartResult {
   const AuthenticationStartResult({

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
+import 'package:honest_dating/models/profile_photo_verification.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/main/discover/discover_screen.dart';
@@ -12,6 +13,7 @@ import 'package:honest_dating/ui/screens/registration/legal_document_placeholder
 import 'package:honest_dating/ui/screens/registration/phone_verification_screen.dart';
 import 'package:honest_dating/ui/screens/registration/bloc/profile_setup_bloc.dart';
 import 'package:honest_dating/ui/screens/registration/profile_completion_screens.dart';
+import 'package:honest_dating/ui/screens/registration/profile_photo_validation_screen.dart';
 import 'package:honest_dating/ui/screens/registration/profile_setup_screen.dart';
 import 'package:honest_dating/ui/screens/registration/verification_code_screen.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
@@ -83,6 +85,22 @@ class MainRouter implements BaseRouter {
           case BaseRouter.profilePhoto:
             return ProfilePhotosScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
+              verificationRepository: _repositoriesFactory
+                  .makeProfilePhotoVerificationRepository(),
+            );
+          case BaseRouter.profilePhotoValidation:
+            final session = settings.arguments;
+            if (session is! ProfilePhotoVerificationSession) {
+              return const PlaceholderScreen(
+                title: 'Photo validation',
+                message:
+                    'Start again from your photos to validate your profile photo.',
+              );
+            }
+            return ProfilePhotoValidationScreen(
+              repository: _repositoriesFactory
+                  .makeProfilePhotoVerificationRepository(),
+              session: session,
             );
           case BaseRouter.profileAboutMe:
             return ProfileAboutMeScreen(

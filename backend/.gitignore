@@ -1,0 +1,8 @@
+# Local backend configuration and service-account credentials must never be
+# committed. Cloud Run uses Application Default Credentials in deployment.
+.env
+.env.*
+service-account*.json
+
+# Local Go binaries and other local build output.
+build/

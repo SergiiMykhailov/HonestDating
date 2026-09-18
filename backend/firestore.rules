@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // This is the initial owner-only account record created immediately after
+    // successful Firebase Authentication. No profile or verification data is
+    // client writable yet.
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'schemaVersion',
+          'createdAt',
+          'updatedAt',
+        ])
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['updatedAt'])
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Identity verification, biometric-consent, and photo-verification state
+    // are server-owned. Client applications must never access this data.
+    match /users/{userId}/private/{document=**} {
+      allow read, write: if false;
+    }
+
+    // Public-profile rules are introduced in their own backend slice. Default
+    // deny keeps all data private until those rules are reviewed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

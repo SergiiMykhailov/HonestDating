@@ -26,8 +26,16 @@ class OnboardingScreenBloc
         event.provider,
       );
       switch (result.status) {
-        case AuthenticationStartStatus.providerUnavailable:
-          emit(OnboardingProviderUnavailable(result.provider));
+        case AuthenticationStartStatus.authenticated:
+          emit(OnboardingAuthenticated(result.provider));
+        case AuthenticationStartStatus.cancelled:
+          emit(const OnboardingReady());
+        case AuthenticationStartStatus.providerConfigurationRequired:
+          emit(OnboardingProviderConfigurationRequired(result.provider));
+        case AuthenticationStartStatus.dataAccessFailed:
+          emit(OnboardingDataAccessFailure(result.provider));
+        case AuthenticationStartStatus.failed:
+          emit(OnboardingAuthenticationFailure(result.provider));
       }
     } catch (_) {
       emit(OnboardingAuthenticationFailure(event.provider));

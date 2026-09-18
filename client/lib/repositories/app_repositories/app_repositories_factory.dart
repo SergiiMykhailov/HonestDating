@@ -1,20 +1,34 @@
 import 'package:honest_dating/repositories/app_repositories/app_authentication_repository.dart';
+import 'package:honest_dating/repositories/app_repositories/app_authenticated_account_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_discovery_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_identity_verification_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_profile_setup_repository.dart';
+import 'package:honest_dating/repositories/app_repositories/app_profile_photo_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_authentication_repository.dart';
+import 'package:honest_dating/repositories/base/base_authenticated_account_repository.dart';
 import 'package:honest_dating/repositories/base/base_discovery_repository.dart';
 import 'package:honest_dating/repositories/base/base_identity_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
+import 'package:honest_dating/repositories/base/base_profile_photo_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
 
 class AppRepositoriesFactory implements BaseRepositoriesFactory {
+  final BaseAuthenticatedAccountRepository _authenticatedAccountRepository =
+      AppAuthenticatedAccountRepository();
   final BaseProfileSetupRepository _profileSetupRepository =
       AppProfileSetupRepository();
+  final BaseIdentityVerificationRepository _identityVerificationRepository =
+      AppIdentityVerificationRepository();
+  late final BaseProfilePhotoVerificationRepository
+  _profilePhotoVerificationRepository = AppProfilePhotoVerificationRepository(
+    identityVerificationRepository: _identityVerificationRepository,
+  );
 
   @override
   BaseAuthenticationRepository makeAuthenticationRepository() {
-    return AppAuthenticationRepository();
+    return AppAuthenticationRepository(
+      authenticatedAccountRepository: _authenticatedAccountRepository,
+    );
   }
 
   @override
@@ -24,7 +38,13 @@ class AppRepositoriesFactory implements BaseRepositoriesFactory {
 
   @override
   BaseIdentityVerificationRepository makeIdentityVerificationRepository() {
-    return AppIdentityVerificationRepository();
+    return _identityVerificationRepository;
+  }
+
+  @override
+  BaseProfilePhotoVerificationRepository
+  makeProfilePhotoVerificationRepository() {
+    return _profilePhotoVerificationRepository;
   }
 
   @override

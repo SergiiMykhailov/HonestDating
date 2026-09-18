@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isSupportedProfileImage() {
+      return request.resource.size > 0
+          && request.resource.size <= 10 * 1024 * 1024
+          && request.resource.contentType.matches(
+              'image/(jpeg|png|webp|heic|heif)');
+    }
+
+    // The client can write one selected image to a private staging path. A Go
+    // Cloud Run handler receives its finalization event and writes only private
+    // verification state. The object is never client-readable.
+    match /users/{userId}/profile-photo-staging/{photoId}/original {
+      allow create: if isOwner(userId) && isSupportedProfileImage();
+      allow read, update, delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

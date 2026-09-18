@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
+import 'package:honest_dating/models/profile_photo_verification.dart';
 import 'package:honest_dating/models/profile_setup_draft.dart';
+import 'package:honest_dating/repositories/base/base_profile_photo_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
 
 sealed class ProfilePhotoEvent {
@@ -28,37 +30,51 @@ class ProfilePhotoState {
   const ProfilePhotoState({
     required this.draft,
     this.isPicking = false,
+    this.isUploading = false,
     this.navigationRequest = 0,
+    this.verificationSession,
     this.errorMessage,
   });
 
   final ProfileSetupDraft draft;
   final bool isPicking;
+  final bool isUploading;
   final int navigationRequest;
+  final ProfilePhotoVerificationSession? verificationSession;
   final String? errorMessage;
 
-  bool get canContinue => draft.mainPhotoPath != null;
+  bool get canContinue =>
+      draft.mainPhotoPath != null && !isPicking && !isUploading;
+
+  bool get isBusy => isPicking || isUploading;
 
   ProfilePhotoState copyWith({
     ProfileSetupDraft? draft,
     bool? isPicking,
+    bool? isUploading,
     int? navigationRequest,
+    ProfilePhotoVerificationSession? verificationSession,
     String? errorMessage,
     bool clearError = false,
   }) {
     return ProfilePhotoState(
       draft: draft ?? this.draft,
       isPicking: isPicking ?? this.isPicking,
+      isUploading: isUploading ?? this.isUploading,
       navigationRequest: navigationRequest ?? this.navigationRequest,
+      verificationSession: verificationSession ?? this.verificationSession,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 }
 
 class ProfilePhotoBloc extends Bloc<ProfilePhotoEvent, ProfilePhotoState> {
-  ProfilePhotoBloc({required BaseProfileSetupRepository repository})
-    : _repository = repository,
-      super(ProfilePhotoState(draft: repository.draft)) {
+  ProfilePhotoBloc({
+    required BaseProfileSetupRepository repository,
+    required BaseProfilePhotoVerificationRepository verificationRepository,
+  }) : _repository = repository,
+       _verificationRepository = verificationRepository,
+       super(ProfilePhotoState(draft: repository.draft)) {
     on<ProfileMainPhotoRequested>(_onMainPhotoRequested);
     on<ProfileGalleryPhotosRequested>(_onGalleryPhotosRequested);
     on<ProfileGalleryPhotoRemoved>(_onGalleryPhotoRemoved);
@@ -66,6 +82,7 @@ class ProfilePhotoBloc extends Bloc<ProfilePhotoEvent, ProfilePhotoState> {
   }
 
   final BaseProfileSetupRepository _repository;
+  final BaseProfilePhotoVerificationRepository _verificationRepository;
 
   Future<void> _onMainPhotoRequested(
     ProfileMainPhotoRequested event,
@@ -136,12 +153,37 @@ class ProfilePhotoBloc extends Bloc<ProfilePhotoEvent, ProfilePhotoState> {
     emit(state.copyWith(draft: draft));
   }
 
-  void _onContinueRequested(
+  Future<void> _onContinueRequested(
     ProfilePhotoContinueRequested event,
     Emitter<ProfilePhotoState> emit,
-  ) {
-    if (state.canContinue) {
-      emit(state.copyWith(navigationRequest: state.navigationRequest + 1));
+  ) async {
+    final mainPhotoPath = state.draft.mainPhotoPath;
+    if (mainPhotoPath == null || state.isBusy) {
+      return;
+    }
+
+    emit(state.copyWith(isUploading: true, clearError: true));
+    try {
+      final session = await _verificationRepository.uploadAndStartVerification(
+        mainPhotoPath: mainPhotoPath,
+        galleryPhotoPaths: state.draft.galleryPhotoPaths,
+      );
+      emit(
+        state.copyWith(
+          isUploading: false,
+          verificationSession: session,
+          navigationRequest: state.navigationRequest + 1,
+        ),
+      );
+    } on ProfilePhotoVerificationException catch (error) {
+      emit(state.copyWith(isUploading: false, errorMessage: error.message));
+    } catch (_) {
+      emit(
+        state.copyWith(
+          isUploading: false,
+          errorMessage: 'We could not upload your photos. Please try again.',
+        ),
+      );
     }
   }
 }
