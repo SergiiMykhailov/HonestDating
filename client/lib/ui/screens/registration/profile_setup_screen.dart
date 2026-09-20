@@ -97,7 +97,7 @@ class _ProfileSetupFlowState extends State<_ProfileSetupFlow> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                     children: [
-                      const AppSetupProgress(currentStep: 5, totalSteps: 6),
+                      const AppSetupProgress(currentStep: 5, totalSteps: 25),
                       const SizedBox(height: 20),
                       _FlowProgress(step: state.step),
                       const SizedBox(height: 40),
@@ -559,7 +559,7 @@ class ProfileSetupCompletionScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const AppSetupProgress(currentStep: 5, totalSteps: 6),
+                    const AppSetupProgress(currentStep: 5, totalSteps: 25),
                     const Spacer(),
                     const Center(
                       child: DecoratedBox(

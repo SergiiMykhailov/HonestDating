@@ -89,7 +89,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                 children: [
-                  const AppSetupProgress(currentStep: 1, totalSteps: 6),
+                  const AppSetupProgress(currentStep: 1, totalSteps: 25),
                   const SizedBox(height: 42),
                   const Text(
                     AppCopy.phoneVerificationTitle,

@@ -103,7 +103,7 @@ class _AgeEligibilityScreenState extends State<AgeEligibilityScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                 children: [
-                  const AppSetupProgress(currentStep: 2, totalSteps: 6),
+                  const AppSetupProgress(currentStep: 4, totalSteps: 25),
                   const SizedBox(height: 42),
                   const Text(
                     AppCopy.ageEligibilityTitle,

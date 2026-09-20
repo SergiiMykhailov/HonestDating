@@ -24,6 +24,15 @@ abstract interface class BaseRouter {
   static const String profileAboutMe = '/registration/profile-about-me';
   static const String profileInterests = '/registration/profile-interests';
   static const String profileReview = '/registration/profile-review';
+  static const String registrationCoreDetails = '/registration/core-details';
+  static const String registrationMainPhoto = '/registration/main-photo';
+  static const String registrationAttribute = '/registration/attribute';
+  static const String registrationFriendshipOnlyConfirmation =
+      '/registration/friendship-only-confirmation';
+  static const String registrationReligiosity = '/registration/religiosity';
+  static const String registrationComplete = '/registration/complete';
+  static const String profileBuilder = '/profile-builder';
+  static const String profileBuilderGallery = '/profile-builder/gallery';
   static const String termsOfService = '/legal/terms-of-service';
   static const String privacyPolicy = '/legal/privacy-policy';
 

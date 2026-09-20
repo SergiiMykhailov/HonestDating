@@ -97,6 +97,7 @@ class ProfilePhotoBloc extends Bloc<ProfilePhotoEvent, ProfilePhotoState> {
       }
       final draft = state.draft.copyWith(
         mainPhotoPath: path,
+        isMainPhotoVerified: false,
         galleryPhotoPaths: state.draft.galleryPhotoPaths
             .where((String galleryPath) => galleryPath != path)
             .toList(),
@@ -126,7 +127,7 @@ class ProfilePhotoBloc extends Bloc<ProfilePhotoEvent, ProfilePhotoState> {
         ...selectedPaths,
       }..remove(state.draft.mainPhotoPath);
       final draft = state.draft.copyWith(
-        galleryPhotoPaths: galleryPaths.toList(),
+        galleryPhotoPaths: galleryPaths.take(10).toList(),
       );
       await _repository.saveDraft(draft);
       emit(state.copyWith(draft: draft, isPicking: false));

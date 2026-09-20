@@ -71,7 +71,7 @@ class _ProfilePhotosFlow extends StatelessWidget {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
                     children: [
-                      const AppSetupProgress(currentStep: 6, totalSteps: 6),
+                      const AppSetupProgress(currentStep: 4, totalSteps: 25),
                       const SizedBox(height: 40),
                       const Text(
                         'Show your best self',
@@ -209,9 +209,14 @@ class _ProfilePhotosFlow extends StatelessWidget {
 }
 
 class ProfileAboutMeScreen extends StatelessWidget {
-  const ProfileAboutMeScreen({super.key, required this.repository});
+  const ProfileAboutMeScreen({
+    super.key,
+    required this.repository,
+    this.returnToBuilder = false,
+  });
 
   final BaseProfileSetupRepository repository;
+  final bool returnToBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -220,13 +225,15 @@ class ProfileAboutMeScreen extends StatelessWidget {
         repository: repository,
         stage: RegistrationCompletionStage.aboutMe,
       ),
-      child: const _ProfileAboutMeFlow(),
+      child: _ProfileAboutMeFlow(returnToBuilder: returnToBuilder),
     );
   }
 }
 
 class _ProfileAboutMeFlow extends StatefulWidget {
-  const _ProfileAboutMeFlow();
+  const _ProfileAboutMeFlow({required this.returnToBuilder});
+
+  final bool returnToBuilder;
 
   @override
   State<_ProfileAboutMeFlow> createState() => _ProfileAboutMeFlowState();
@@ -267,7 +274,11 @@ class _ProfileAboutMeFlowState extends State<_ProfileAboutMeFlow> {
             ) => previous.navigationRequest != current.navigationRequest,
         listener: (BuildContext context, RegistrationCompletionState state) {
           if (state.navigationRequest > 0) {
-            Navigator.of(context).pushNamed(BaseRouter.profileInterests);
+            if (widget.returnToBuilder) {
+              Navigator.of(context).maybePop();
+            } else {
+              Navigator.of(context).pushNamed(BaseRouter.profileInterests);
+            }
           }
         },
         builder: (BuildContext context, RegistrationCompletionState state) {
@@ -287,7 +298,8 @@ class _ProfileAboutMeFlowState extends State<_ProfileAboutMeFlow> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                     children: [
-                      const AppSetupProgress(currentStep: 6, totalSteps: 6),
+                      if (!widget.returnToBuilder)
+                        const AppSetupProgress(currentStep: 25, totalSteps: 25),
                       const SizedBox(height: 40),
                       const Text(
                         'Tell us about yourself',
@@ -340,8 +352,12 @@ class _ProfileAboutMeFlowState extends State<_ProfileAboutMeFlow> {
                       ),
                       const SizedBox(height: 18),
                       AppPrimaryButton(
-                        label: 'Continue',
-                        onPressed: state.canContinue
+                        label: widget.returnToBuilder
+                            ? 'Save and return'
+                            : 'Continue',
+                        onPressed: widget.returnToBuilder
+                            ? () => Navigator.of(context).maybePop()
+                            : state.canContinue
                             ? () {
                                 context.read<RegistrationCompletionBloc>().add(
                                   const AboutMeContinueRequested(),
@@ -362,9 +378,14 @@ class _ProfileAboutMeFlowState extends State<_ProfileAboutMeFlow> {
 }
 
 class ProfileInterestsScreen extends StatelessWidget {
-  const ProfileInterestsScreen({super.key, required this.repository});
+  const ProfileInterestsScreen({
+    super.key,
+    required this.repository,
+    this.returnToBuilder = false,
+  });
 
   final BaseProfileSetupRepository repository;
+  final bool returnToBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -373,13 +394,15 @@ class ProfileInterestsScreen extends StatelessWidget {
         repository: repository,
         stage: RegistrationCompletionStage.interests,
       ),
-      child: const _ProfileInterestsFlow(),
+      child: _ProfileInterestsFlow(returnToBuilder: returnToBuilder),
     );
   }
 }
 
 class _ProfileInterestsFlow extends StatefulWidget {
-  const _ProfileInterestsFlow();
+  const _ProfileInterestsFlow({required this.returnToBuilder});
+
+  final bool returnToBuilder;
 
   @override
   State<_ProfileInterestsFlow> createState() => _ProfileInterestsFlowState();
@@ -406,7 +429,11 @@ class _ProfileInterestsFlowState extends State<_ProfileInterestsFlow> {
             ) => previous.navigationRequest != current.navigationRequest,
         listener: (BuildContext context, RegistrationCompletionState state) {
           if (state.navigationRequest > 0) {
-            Navigator.of(context).pushNamed(BaseRouter.profileReview);
+            if (widget.returnToBuilder) {
+              Navigator.of(context).maybePop();
+            } else {
+              Navigator.of(context).pushNamed(BaseRouter.profileReview);
+            }
           }
         },
         builder: (BuildContext context, RegistrationCompletionState state) {
@@ -426,7 +453,8 @@ class _ProfileInterestsFlowState extends State<_ProfileInterestsFlow> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                     children: [
-                      const AppSetupProgress(currentStep: 6, totalSteps: 6),
+                      if (!widget.returnToBuilder)
+                        const AppSetupProgress(currentStep: 25, totalSteps: 25),
                       const SizedBox(height: 40),
                       const Text(
                         'What are you into?',
@@ -501,8 +529,12 @@ class _ProfileInterestsFlowState extends State<_ProfileInterestsFlow> {
                       ],
                       const SizedBox(height: 18),
                       AppPrimaryButton(
-                        label: 'Continue',
-                        onPressed: state.canContinue
+                        label: widget.returnToBuilder
+                            ? 'Save and return'
+                            : 'Continue',
+                        onPressed: widget.returnToBuilder
+                            ? () => Navigator.of(context).maybePop()
+                            : state.canContinue
                             ? () {
                                 context.read<RegistrationCompletionBloc>().add(
                                   const InterestsContinueRequested(),
@@ -588,7 +620,10 @@ class _ProfileReviewFlow extends StatelessWidget {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                         children: [
-                          const AppSetupProgress(currentStep: 6, totalSteps: 6),
+                          const AppSetupProgress(
+                            currentStep: 27,
+                            totalSteps: 25,
+                          ),
                           const SizedBox(height: 32),
                           if (state.draft.mainPhotoPath case final String path)
                             ClipRRect(

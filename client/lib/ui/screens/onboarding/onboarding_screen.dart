@@ -61,7 +61,7 @@ class _OnboardingView extends StatelessWidget {
           (OnboardingScreenState previous, OnboardingScreenState next) =>
               next is OnboardingAuthenticated,
       listener: (BuildContext context, OnboardingScreenState state) {
-        Navigator.of(context).pushNamed(BaseRouter.phoneVerification);
+        Navigator.of(context).pushNamed(BaseRouter.consent);
       },
       child: SafeArea(
         bottom: false,
@@ -80,7 +80,7 @@ class _OnboardingView extends StatelessWidget {
                             onTriggered: () {
                               Navigator.of(
                                 context,
-                              ).pushNamed(BaseRouter.phoneVerification);
+                              ).pushNamed(BaseRouter.consent);
                             },
                             child: welcomeArea,
                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:honest_dating/config/app_colors.dart';
 
 class AppFormField extends StatelessWidget {
@@ -11,6 +12,7 @@ class AppFormField extends StatelessWidget {
     this.obscureText = false,
     this.autofocus = false,
     this.onChanged,
+    this.inputFormatters,
   });
 
   final String label;
@@ -20,6 +22,7 @@ class AppFormField extends StatelessWidget {
   final bool obscureText;
   final bool autofocus;
   final ValueChanged<String>? onChanged;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +42,7 @@ class AppFormField extends StatelessWidget {
           obscureText: obscureText,
           autofocus: autofocus,
           onChanged: onChanged,
+          inputFormatters: inputFormatters,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
           placeholder: placeholder,
           decoration: BoxDecoration(

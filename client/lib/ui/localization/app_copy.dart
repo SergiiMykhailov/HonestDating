@@ -57,31 +57,32 @@ abstract final class AppCopy {
       'The approved Terms of Service will be displayed here before this flow is released.';
   static const String privacyPolicyPlaceholder =
       'The approved Privacy Policy will be displayed here before this flow is released.';
-  static const String identityVerificationNavigationTitle = 'Identity check';
+  static const String identityVerificationNavigationTitle =
+      'Human verification';
   static const String identityVerificationTitle = 'Let’s verify it’s you';
   static const String identityVerificationBody =
       'A brief selfie check helps keep Honest Dating safe and genuine.';
   static const String identityVerificationPreview =
-      'FaceTec Test API is enabled for this iOS debug build. Camera access is needed to continue.';
-  static const String identityVerificationAction = 'Start selfie check';
+      'Camera access is needed to complete this liveness check.';
+  static const String identityVerificationAction = 'Start liveness check';
   static const String identityVerificationStartingAction =
-      'Starting selfie check';
+      'Starting liveness check';
   static const String identityVerificationCancelled =
-      'The selfie check was cancelled. You can start it again when you are ready.';
+      'The liveness check was cancelled. You can start it again when you are ready.';
   static const String identityVerificationCameraPermissionDenied =
-      'Camera access is required for the selfie check. Enable it in Settings, then try again.';
+      'Camera access is required for the liveness check. Enable it in Settings, then try again.';
   static const String identityVerificationInitializationFailed =
-      'We could not start the selfie check. Check the local FaceTec Test API configuration, then try again.';
+      'We could not start the liveness check. Check the local test configuration, then try again.';
   static const String identityVerificationNetworkFailed =
       'We could not reach the FaceTec Test API. Check your connection and try again.';
   static const String identityVerificationServiceFailed =
-      'The FaceTec Test API could not complete this selfie check. Check its test configuration and try again.';
+      'The test service could not complete this liveness check. Check its test configuration and try again.';
   static const String identityVerificationCameraError =
-      'We could not use your camera for the selfie check. Close any app using it, then try again.';
+      'We could not use your camera for the liveness check. Close any app using it, then try again.';
   static const String identityVerificationLockedOut =
-      'The selfie check is temporarily unavailable. Please wait a moment, then try again.';
+      'The liveness check is temporarily unavailable. Please wait a moment, then try again.';
   static const String identityVerificationUnavailable =
-      'Selfie testing is available only in an iOS debug build with the local FaceTec SDK installed.';
+      'Liveness testing is available only in an iOS debug build with the local SDK installed.';
   static const String identityVerificationFailed =
-      'We could not complete the selfie check. Check your connection and try again.';
+      'We could not complete the liveness check. Check your connection and try again.';
 }

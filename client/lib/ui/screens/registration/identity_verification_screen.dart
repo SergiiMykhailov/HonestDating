@@ -36,7 +36,7 @@ class _IdentityVerificationView extends StatelessWidget {
       child: BlocListener<IdentityVerificationBloc, IdentityVerificationState>(
         listener: (BuildContext context, IdentityVerificationState state) {
           if (state.phase == IdentityVerificationPhase.completed) {
-            Navigator.of(context).pushReplacementNamed(BaseRouter.profileSetup);
+            Navigator.of(context).pushNamed(BaseRouter.registrationMainPhoto);
           }
         },
         child: BlocBuilder<IdentityVerificationBloc, IdentityVerificationState>(
@@ -48,7 +48,7 @@ class _IdentityVerificationView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AppNavigationBar(
-                  title: AppCopy.identityVerificationNavigationTitle,
+                  title: 'Human verification',
                   leading: _BackButton(
                     onPressed: () => Navigator.of(context).pop(),
                   ),
@@ -60,10 +60,10 @@ class _IdentityVerificationView extends StatelessWidget {
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                       children: [
-                        const AppSetupProgress(currentStep: 4, totalSteps: 6),
+                        const AppSetupProgress(currentStep: 3, totalSteps: 25),
                         const SizedBox(height: 42),
                         const Text(
-                          AppCopy.identityVerificationTitle,
+                          'Let’s verify it’s you',
                           style: TextStyle(
                             color: AppColors.ink,
                             fontSize: 30,
@@ -74,7 +74,7 @@ class _IdentityVerificationView extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          AppCopy.identityVerificationBody,
+                          'A brief selfie check helps keep Honest Dating safe and genuine.',
                           style: TextStyle(
                             color: AppColors.mutedInk,
                             fontSize: 16,

@@ -1,3 +1,5 @@
+enum HeightUnit { metric, imperial }
+
 class ProfileSetupDraft {
   const ProfileSetupDraft({
     this.firstName = '',
@@ -7,6 +9,9 @@ class ProfileSetupDraft {
     this.orientation = '',
     this.relationshipIntention = '',
     this.heightCentimeters = '',
+    this.heightUnit = HeightUnit.metric,
+    this.heightFeet = '',
+    this.heightInches = '',
     this.bodyType = '',
     this.hairColor = '',
     this.eyeColor = '',
@@ -32,7 +37,9 @@ class ProfileSetupDraft {
     this.educationLevel = '',
     this.currentEducation = '',
     this.employment = '',
+    this.politicalViews = '',
     this.mainPhotoPath,
+    this.isMainPhotoVerified = false,
     this.galleryPhotoPaths = const <String>[],
     this.aboutMe = '',
     this.interests = const <String>[],
@@ -45,6 +52,9 @@ class ProfileSetupDraft {
   final String orientation;
   final String relationshipIntention;
   final String heightCentimeters;
+  final HeightUnit heightUnit;
+  final String heightFeet;
+  final String heightInches;
   final String bodyType;
   final String hairColor;
   final String eyeColor;
@@ -70,7 +80,9 @@ class ProfileSetupDraft {
   final String educationLevel;
   final String currentEducation;
   final String employment;
+  final String politicalViews;
   final String? mainPhotoPath;
+  final bool isMainPhotoVerified;
   final List<String> galleryPhotoPaths;
   final String aboutMe;
   final List<String> interests;
@@ -164,6 +176,32 @@ class ProfileSetupDraft {
     return height != null && height >= 80 && height <= 250;
   }
 
+  bool get hasValidRegistrationHeight {
+    if (heightUnit == HeightUnit.metric) {
+      return hasValidHeight;
+    }
+
+    final feet = int.tryParse(heightFeet.trim());
+    final inches = int.tryParse(heightInches.trim());
+    if (feet == null || inches == null || inches < 0 || inches > 11) {
+      return false;
+    }
+    final centimeters = ((feet * 12 + inches) * 2.54).round();
+    return centimeters >= 80 && centimeters <= 250;
+  }
+
+  String get normalizedHeightCentimeters {
+    if (heightUnit == HeightUnit.metric) {
+      return heightCentimeters.trim();
+    }
+    if (!hasValidRegistrationHeight) {
+      return '';
+    }
+    final feet = int.parse(heightFeet.trim());
+    final inches = int.parse(heightInches.trim());
+    return ((feet * 12 + inches) * 2.54).round().toString();
+  }
+
   bool get isBasicComplete =>
       firstName.trim().isNotEmpty &&
       lastName.trim().isNotEmpty &&
@@ -216,6 +254,40 @@ class ProfileSetupDraft {
       aboutMe.trim().isNotEmpty &&
       interests.isNotEmpty;
 
+  /// Completion requirements for the consent-first registration flow.
+  /// Legacy fields stay intentionally out of this gate so retired screens can
+  /// remain available in source without affecting the active experience.
+  bool get isRegistrationRequiredComplete =>
+      firstName.trim().isNotEmpty &&
+      dateOfBirth != null &&
+      (age ?? 0) >= 18 &&
+      gender.isNotEmpty &&
+      orientation.isNotEmpty &&
+      relationshipIntention.isNotEmpty &&
+      hasValidRegistrationHeight &&
+      bodyType.isNotEmpty &&
+      languages.isNotEmpty &&
+      languages.length <= 5 &&
+      countryOfOrigin.isNotEmpty &&
+      religion.isNotEmpty &&
+      (religion == 'No Religion' || religiosity.isNotEmpty) &&
+      socialOrientation.isNotEmpty &&
+      goingOut.isNotEmpty &&
+      livingArrangement.isNotEmpty &&
+      diet.isNotEmpty &&
+      exercise.isNotEmpty &&
+      alcohol.isNotEmpty &&
+      smoking.isNotEmpty &&
+      recreationalDrugs.isNotEmpty &&
+      pets.isNotEmpty &&
+      children.isNotEmpty &&
+      educationLevel.isNotEmpty &&
+      currentEducation.isNotEmpty &&
+      employment.isNotEmpty &&
+      politicalViews.isNotEmpty &&
+      mainPhotoPath != null &&
+      isMainPhotoVerified;
+
   ProfileSetupDraft copyWith({
     String? firstName,
     String? lastName,
@@ -224,6 +296,9 @@ class ProfileSetupDraft {
     String? orientation,
     String? relationshipIntention,
     String? heightCentimeters,
+    HeightUnit? heightUnit,
+    String? heightFeet,
+    String? heightInches,
     String? bodyType,
     String? hairColor,
     String? eyeColor,
@@ -249,7 +324,9 @@ class ProfileSetupDraft {
     String? educationLevel,
     String? currentEducation,
     String? employment,
+    String? politicalViews,
     String? mainPhotoPath,
+    bool? isMainPhotoVerified,
     List<String>? galleryPhotoPaths,
     String? aboutMe,
     List<String>? interests,
@@ -263,6 +340,9 @@ class ProfileSetupDraft {
       relationshipIntention:
           relationshipIntention ?? this.relationshipIntention,
       heightCentimeters: heightCentimeters ?? this.heightCentimeters,
+      heightUnit: heightUnit ?? this.heightUnit,
+      heightFeet: heightFeet ?? this.heightFeet,
+      heightInches: heightInches ?? this.heightInches,
       bodyType: bodyType ?? this.bodyType,
       hairColor: hairColor ?? this.hairColor,
       eyeColor: eyeColor ?? this.eyeColor,
@@ -288,7 +368,9 @@ class ProfileSetupDraft {
       educationLevel: educationLevel ?? this.educationLevel,
       currentEducation: currentEducation ?? this.currentEducation,
       employment: employment ?? this.employment,
+      politicalViews: politicalViews ?? this.politicalViews,
       mainPhotoPath: mainPhotoPath ?? this.mainPhotoPath,
+      isMainPhotoVerified: isMainPhotoVerified ?? this.isMainPhotoVerified,
       galleryPhotoPaths: galleryPhotoPaths ?? this.galleryPhotoPaths,
       aboutMe: aboutMe ?? this.aboutMe,
       interests: interests ?? this.interests,

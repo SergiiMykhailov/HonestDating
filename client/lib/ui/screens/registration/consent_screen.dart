@@ -19,8 +19,8 @@ class _ConsentScreenState extends State<ConsentScreen> {
 
   bool get _canContinue => _hasAcceptedTerms && _hasAcceptedPrivacyPolicy;
 
-  void _continueToIdentityVerification() {
-    Navigator.of(context).pushNamed(BaseRouter.identityVerification);
+  void _continueToCoreDetails() {
+    Navigator.of(context).pushNamed(BaseRouter.registrationCoreDetails);
   }
 
   @override
@@ -32,7 +32,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
         children: [
           AppNavigationBar(
             title: AppCopy.consentNavigationTitle,
-            leading: _BackButton(onPressed: () => Navigator.of(context).pop()),
+            leading: _BackButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
           ),
           Expanded(
             child: SafeArea(
@@ -40,7 +42,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                 children: [
-                  const AppSetupProgress(currentStep: 3, totalSteps: 6),
+                  const AppSetupProgress(currentStep: 1, totalSteps: 25),
                   const SizedBox(height: 42),
                   const Text(
                     AppCopy.consentTitle,
@@ -88,15 +90,43 @@ class _ConsentScreenState extends State<ConsentScreen> {
                   const SizedBox(height: 28),
                   AppPrimaryButton(
                     label: AppCopy.consentAction,
-                    onPressed: _canContinue
-                        ? _continueToIdentityVerification
-                        : null,
+                    onPressed: _canContinue ? _continueToCoreDetails : null,
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BackButton extends StatelessWidget {
+  const _BackButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minimumSize: const Size(48, 48),
+      onPressed: onPressed,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.line),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: const SizedBox(
+          width: 48,
+          height: 48,
+          child: Icon(
+            CupertinoIcons.chevron_back,
+            color: AppColors.coral,
+            size: 21,
+          ),
+        ),
       ),
     );
   }
@@ -155,37 +185,6 @@ class _ConsentToggle extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BackButton extends StatelessWidget {
-  const _BackButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      minimumSize: const Size(48, 48),
-      onPressed: onPressed,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.canvas,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: AppColors.line),
-        ),
-        child: const SizedBox(
-          width: 48,
-          height: 48,
-          child: Icon(
-            CupertinoIcons.chevron_back,
-            color: AppColors.coral,
-            size: 21,
-          ),
         ),
       ),
     );

@@ -5,8 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/models/profile_photo_verification.dart';
 import 'package:honest_dating/repositories/base/base_profile_photo_verification_repository.dart';
+import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/registration/bloc/profile_photo_validation_bloc.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_attribute.dart';
 import 'package:honest_dating/ui/widgets/app_action_button.dart';
 import 'package:honest_dating/ui/widgets/app_feedback_card.dart';
 import 'package:honest_dating/ui/widgets/app_form_controls.dart';
@@ -16,10 +18,12 @@ class ProfilePhotoValidationScreen extends StatelessWidget {
   const ProfilePhotoValidationScreen({
     super.key,
     required this.repository,
+    required this.profileSetupRepository,
     required this.session,
   });
 
   final BaseProfilePhotoVerificationRepository repository;
+  final BaseProfileSetupRepository profileSetupRepository;
   final ProfilePhotoVerificationSession session;
 
   @override
@@ -27,13 +31,17 @@ class ProfilePhotoValidationScreen extends StatelessWidget {
     return BlocProvider<ProfilePhotoValidationBloc>(
       create: (BuildContext context) =>
           ProfilePhotoValidationBloc(repository: repository, session: session),
-      child: const _ProfilePhotoValidationFlow(),
+      child: _ProfilePhotoValidationFlow(
+        profileSetupRepository: profileSetupRepository,
+      ),
     );
   }
 }
 
 class _ProfilePhotoValidationFlow extends StatefulWidget {
-  const _ProfilePhotoValidationFlow();
+  const _ProfilePhotoValidationFlow({required this.profileSetupRepository});
+
+  final BaseProfileSetupRepository profileSetupRepository;
 
   @override
   State<_ProfilePhotoValidationFlow> createState() =>
@@ -68,11 +76,7 @@ class _ProfilePhotoValidationFlowState
             listener:
                 (BuildContext context, ProfilePhotoValidationState state) {
                   if (state.navigationRequest > 0) {
-                    unawaited(
-                      Navigator.of(
-                        context,
-                      ).pushReplacementNamed(BaseRouter.profileAboutMe),
-                    );
+                    unawaited(_continueAfterApproval(context));
                   }
                 },
             builder: (BuildContext context, ProfilePhotoValidationState state) {
@@ -92,7 +96,10 @@ class _ProfilePhotoValidationFlowState
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                         children: [
-                          const AppSetupProgress(currentStep: 6, totalSteps: 6),
+                          const AppSetupProgress(
+                            currentStep: 4,
+                            totalSteps: 25,
+                          ),
                           const SizedBox(height: 44),
                           Center(child: _StatusMark(status: state.status)),
                           const SizedBox(height: 28),
@@ -161,6 +168,20 @@ class _ProfilePhotoValidationFlowState
               );
             },
           ),
+    );
+  }
+
+  Future<void> _continueAfterApproval(BuildContext context) async {
+    final draft = widget.profileSetupRepository.draft;
+    await widget.profileSetupRepository.saveDraft(
+      draft.copyWith(isMainPhotoVerified: true),
+    );
+    if (!context.mounted) {
+      return;
+    }
+    await Navigator.of(context).pushReplacementNamed(
+      BaseRouter.registrationAttribute,
+      arguments: RegistrationAttributeStep.sexualOrientation,
     );
   }
 

@@ -16,6 +16,13 @@ import 'package:honest_dating/ui/screens/registration/profile_completion_screens
 import 'package:honest_dating/ui/screens/registration/profile_photo_validation_screen.dart';
 import 'package:honest_dating/ui/screens/registration/profile_setup_screen.dart';
 import 'package:honest_dating/ui/screens/registration/verification_code_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_attribute.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_attribute_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/bloc/registration_core_details_bloc.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_complete_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_conditional_screens.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_core_details_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_main_photo_screen.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
 
 class MainRouter implements BaseRouter {
@@ -68,6 +75,13 @@ class MainRouter implements BaseRouter {
             );
           case BaseRouter.consent:
             return const ConsentScreen();
+          case BaseRouter.registrationCoreDetails:
+            return RegistrationCoreDetailsScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+              step: settings.arguments is RegistrationCoreDetailsStep
+                  ? settings.arguments! as RegistrationCoreDetailsStep
+                  : RegistrationCoreDetailsStep.firstName,
+            );
           case BaseRouter.identityVerification:
             return IdentityVerificationScreen(
               repository: _repositoriesFactory
@@ -100,18 +114,55 @@ class MainRouter implements BaseRouter {
             return ProfilePhotoValidationScreen(
               repository: _repositoriesFactory
                   .makeProfilePhotoVerificationRepository(),
+              profileSetupRepository: _repositoriesFactory
+                  .makeProfileSetupRepository(),
               session: session,
             );
           case BaseRouter.profileAboutMe:
             return ProfileAboutMeScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
+              returnToBuilder:
+                  settings.arguments is bool && (settings.arguments! as bool),
             );
           case BaseRouter.profileInterests:
             return ProfileInterestsScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
+              returnToBuilder:
+                  settings.arguments is bool && (settings.arguments! as bool),
             );
           case BaseRouter.profileReview:
             return ProfileReviewScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.registrationMainPhoto:
+            return RegistrationMainPhotoScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+              verificationRepository: _repositoriesFactory
+                  .makeProfilePhotoVerificationRepository(),
+            );
+          case BaseRouter.registrationAttribute:
+            return RegistrationAttributeScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+              step: settings.arguments is RegistrationAttributeStep
+                  ? settings.arguments! as RegistrationAttributeStep
+                  : RegistrationAttributeStep.sexualOrientation,
+            );
+          case BaseRouter.registrationFriendshipOnlyConfirmation:
+            return const RegistrationFriendshipOnlyConfirmationScreen();
+          case BaseRouter.registrationReligiosity:
+            return RegistrationReligiosityScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.registrationComplete:
+            return RegistrationCompleteScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.profileBuilder:
+            return ProfileBuilderScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.profileBuilderGallery:
+            return ProfileBuilderGalleryScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
             );
           case BaseRouter.termsOfService:
