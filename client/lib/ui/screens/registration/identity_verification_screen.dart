@@ -21,13 +21,47 @@ class IdentityVerificationScreen extends StatelessWidget {
     return BlocProvider<IdentityVerificationBloc>(
       create: (BuildContext context) =>
           IdentityVerificationBloc(repository: repository),
-      child: const _IdentityVerificationView(),
+      child: _IdentityVerificationView(repository: repository),
     );
   }
 }
 
-class _IdentityVerificationView extends StatelessWidget {
-  const _IdentityVerificationView();
+class _IdentityVerificationView extends StatefulWidget {
+  const _IdentityVerificationView({required this.repository});
+
+  final BaseIdentityVerificationRepository repository;
+
+  @override
+  State<_IdentityVerificationView> createState() =>
+      _IdentityVerificationViewState();
+}
+
+class _IdentityVerificationViewState extends State<_IdentityVerificationView> {
+  var _checkingDevice = true;
+  var _isSkippedOnThisDevice = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkDeviceAndContinueIfNeeded();
+  }
+
+  Future<void> _checkDeviceAndContinueIfNeeded() async {
+    final isSkipped = await widget.repository
+        .isLivenessCheckSkippedOnCurrentDevice();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _checkingDevice = false;
+      _isSkippedOnThisDevice = isSkipped;
+    });
+    if (isSkipped) {
+      context.read<IdentityVerificationBloc>().add(
+        const IdentityVerificationRequested(),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,11 +150,17 @@ class _IdentityVerificationView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
                     child: AppPrimaryButton(
-                      label: isInProgress
-                          ? AppCopy.identityVerificationStartingAction
+                      label:
+                          _checkingDevice ||
+                              _isSkippedOnThisDevice ||
+                              isInProgress
+                          ? 'Preparing registration…'
                           : AppCopy.identityVerificationAction,
-                      isLoading: isInProgress,
-                      onPressed: isInProgress
+                      isLoading: _checkingDevice || isInProgress,
+                      onPressed:
+                          _checkingDevice ||
+                              _isSkippedOnThisDevice ||
+                              isInProgress
                           ? null
                           : () {
                               context.read<IdentityVerificationBloc>().add(

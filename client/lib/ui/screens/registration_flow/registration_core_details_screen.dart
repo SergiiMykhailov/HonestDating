@@ -51,6 +51,7 @@ class _RegistrationCoreDetailsViewState
     final state = context.read<RegistrationCoreDetailsBloc>().state;
     _controller.text = switch (state.step) {
       RegistrationCoreDetailsStep.firstName => state.draft.firstName,
+      RegistrationCoreDetailsStep.lastName => state.draft.lastName,
       RegistrationCoreDetailsStep.gender => '',
       RegistrationCoreDetailsStep.dateOfBirth => state.dateOfBirthInput,
     };
@@ -175,19 +176,45 @@ class _StepInput extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             _ContinueButton(enabled: state.canContinue),
+            const SizedBox(height: 20),
+            const _ProtectedFieldNotice(fieldName: 'first name'),
+          ],
+        );
+      case RegistrationCoreDetailsStep.lastName:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppFormField(
+              label: 'Last name',
+              placeholder: 'Type your last name',
+              controller: controller,
+              keyboardType: TextInputType.name,
+              autofocus: true,
+              onChanged: (String value) {
+                context.read<RegistrationCoreDetailsBloc>().add(
+                  RegistrationLastNameChanged(value),
+                );
+              },
+            ),
+            const SizedBox(height: 18),
+            _ContinueButton(enabled: state.canContinue),
+            const SizedBox(height: 20),
+            const _ProtectedFieldNotice(fieldName: 'last name'),
           ],
         );
       case RegistrationCoreDetailsStep.gender:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: const <String>['Man', 'Woman', 'Non-binary']
-              .map(
-                (String gender) => Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: _GenderChoice(label: gender),
-                ),
-              )
-              .toList(),
+          children: [
+            ...const <String>['Man', 'Woman', 'Non-binary'].map(
+              (String gender) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _GenderChoice(label: gender),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const _ProtectedFieldNotice(fieldName: 'gender'),
+          ],
         );
       case RegistrationCoreDetailsStep.dateOfBirth:
         final error = state.dateOfBirthError ?? state.eligibilityError;
@@ -222,18 +249,45 @@ class _StepInput extends StatelessWidget {
             ],
             const SizedBox(height: 18),
             _ContinueButton(enabled: state.canContinue),
-            const SizedBox(height: 22),
-            const Text(
-              'Please make sure your first name, gender, and date of birth are correct. After you complete registration, these details will be fixed and cannot be changed freely. This helps us maintain a trusted community that is more resistant to bots, catfishing, and bad behavior. If you make a genuine mistake, changes may be possible through the applicable verification or support-review process. Please review your information carefully before continuing.',
-              style: TextStyle(
-                color: AppColors.mutedInk,
-                fontSize: 13,
-                height: 1.4,
-              ),
-            ),
+            const SizedBox(height: 20),
+            const _ProtectedFieldNotice(fieldName: 'date of birth'),
           ],
         );
     }
+  }
+}
+
+class _ProtectedFieldNotice extends StatelessWidget {
+  const _ProtectedFieldNotice({required this.fieldName});
+
+  final String fieldName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 2),
+          child: Icon(
+            CupertinoIcons.exclamationmark_triangle_fill,
+            color: AppColors.warning,
+            size: 17,
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            'Make sure your $fieldName is correct. It cannot be changed later after registration.',
+            style: const TextStyle(
+              color: AppColors.mutedInk,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -291,6 +345,8 @@ String _titleFor(RegistrationCoreDetailsStep step) {
   switch (step) {
     case RegistrationCoreDetailsStep.firstName:
       return 'What’s your first name?';
+    case RegistrationCoreDetailsStep.lastName:
+      return 'What’s your last name?';
     case RegistrationCoreDetailsStep.gender:
       return 'How do you identify?';
     case RegistrationCoreDetailsStep.dateOfBirth:
@@ -302,6 +358,8 @@ String _bodyFor(RegistrationCoreDetailsStep step) {
   switch (step) {
     case RegistrationCoreDetailsStep.firstName:
       return 'Use the name you want people to see.';
+    case RegistrationCoreDetailsStep.lastName:
+      return 'Use the surname you want to use on Honest Dating.';
     case RegistrationCoreDetailsStep.gender:
       return 'Tap one option to choose it and continue.';
     case RegistrationCoreDetailsStep.dateOfBirth:

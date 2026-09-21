@@ -244,11 +244,6 @@ class RegistrationAttributeBloc
       );
       return;
     }
-    if (state.step == RegistrationAttributeStep.religion &&
-        value != 'No Religion') {
-      _emitNavigation(emit, RegistrationAttributeDestination.religiosity);
-      return;
-    }
     _navigateToNext(emit);
   }
 

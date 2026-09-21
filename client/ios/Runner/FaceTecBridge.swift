@@ -35,6 +35,15 @@ final class FaceTecBridge: NSObject {
                 return
             }
 
+            if call.method == "isSimulator" {
+#if targetEnvironment(simulator)
+                result(true)
+#else
+                result(false)
+#endif
+                return
+            }
+
             guard call.method == "startLivenessCheck" else {
                 result(FlutterMethodNotImplemented)
                 return

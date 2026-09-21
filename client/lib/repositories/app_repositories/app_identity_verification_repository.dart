@@ -32,6 +32,17 @@ class AppIdentityVerificationRepository
       _activeLivenessVerificationToken;
 
   @override
+  Future<bool> isLivenessCheckSkippedOnCurrentDevice() async {
+    try {
+      return await _channel.invokeMethod<bool>('isSimulator') ?? false;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  @override
   Future<IdentityVerificationResult> startLivenessCheck() async {
     _activeLivenessVerificationToken = null;
 

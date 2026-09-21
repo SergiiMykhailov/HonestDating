@@ -2,10 +2,10 @@ import 'package:bloc/bloc.dart';
 import 'package:honest_dating/models/profile_setup_draft.dart';
 import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
 
-enum RegistrationCoreDetailsStep { firstName, gender, dateOfBirth }
+enum RegistrationCoreDetailsStep { firstName, lastName, gender, dateOfBirth }
 
 extension RegistrationCoreDetailsStepDetails on RegistrationCoreDetailsStep {
-  /// These three focused pages are one registration stage: core details.
+  /// These focused pages are one registration stage: core details.
   int get registrationStep => 2;
 
   RegistrationCoreDetailsStep? get next {
@@ -22,6 +22,12 @@ sealed class RegistrationCoreDetailsEvent {
 
 class RegistrationFirstNameChanged extends RegistrationCoreDetailsEvent {
   const RegistrationFirstNameChanged(this.value);
+
+  final String value;
+}
+
+class RegistrationLastNameChanged extends RegistrationCoreDetailsEvent {
+  const RegistrationLastNameChanged(this.value);
 
   final String value;
 }
@@ -69,6 +75,8 @@ class RegistrationCoreDetailsState {
     switch (step) {
       case RegistrationCoreDetailsStep.firstName:
         return draft.firstName.trim().isNotEmpty;
+      case RegistrationCoreDetailsStep.lastName:
+        return draft.lastName.trim().isNotEmpty;
       case RegistrationCoreDetailsStep.gender:
         return draft.gender.isNotEmpty;
       case RegistrationCoreDetailsStep.dateOfBirth:
@@ -122,6 +130,7 @@ class RegistrationCoreDetailsBloc
          ),
        ) {
     on<RegistrationFirstNameChanged>(_onFirstNameChanged);
+    on<RegistrationLastNameChanged>(_onLastNameChanged);
     on<RegistrationGenderSelected>(_onGenderSelected);
     on<RegistrationDateOfBirthChanged>(_onDateOfBirthChanged);
     on<RegistrationCoreDetailsContinueRequested>(_onContinueRequested);
@@ -134,6 +143,15 @@ class RegistrationCoreDetailsBloc
     Emitter<RegistrationCoreDetailsState> emit,
   ) async {
     final draft = state.draft.copyWith(firstName: event.value);
+    await _repository.saveDraft(draft);
+    emit(state.copyWith(draft: draft));
+  }
+
+  Future<void> _onLastNameChanged(
+    RegistrationLastNameChanged event,
+    Emitter<RegistrationCoreDetailsState> emit,
+  ) async {
+    final draft = state.draft.copyWith(lastName: event.value);
     await _repository.saveDraft(draft);
     emit(state.copyWith(draft: draft));
   }

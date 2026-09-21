@@ -5,5 +5,11 @@ abstract interface class BaseIdentityVerificationRepository {
   /// It is intentionally not a FaceTec identifier and is never persisted.
   String? get activeLivenessVerificationToken;
 
+  /// Whether this device cannot run the native FaceTec capture.
+  ///
+  /// iOS simulators use the preview path so the registration flow remains
+  /// navigable without a physical camera or the FaceTec SDK session UI.
+  Future<bool> isLivenessCheckSkippedOnCurrentDevice();
+
   Future<IdentityVerificationResult> startLivenessCheck();
 }

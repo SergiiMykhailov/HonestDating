@@ -254,11 +254,20 @@ class ProfileSetupDraft {
       aboutMe.trim().isNotEmpty &&
       interests.isNotEmpty;
 
+  /// The final registration gate is intentionally separate from the core
+  /// attribute gate. It keeps Discover unavailable until the user has added
+  /// the minimum discovery information required by the registration flow.
+  bool get hasRequiredRegistrationInterests => interests.length >= 5;
+
+  bool get hasRequiredRegistrationGalleryPhotos =>
+      galleryPhotoPaths.length >= 2;
+
   /// Completion requirements for the consent-first registration flow.
   /// Legacy fields stay intentionally out of this gate so retired screens can
   /// remain available in source without affecting the active experience.
   bool get isRegistrationRequiredComplete =>
       firstName.trim().isNotEmpty &&
+      lastName.trim().isNotEmpty &&
       dateOfBirth != null &&
       (age ?? 0) >= 18 &&
       gender.isNotEmpty &&
@@ -270,7 +279,6 @@ class ProfileSetupDraft {
       languages.length <= 5 &&
       countryOfOrigin.isNotEmpty &&
       religion.isNotEmpty &&
-      (religion == 'No Religion' || religiosity.isNotEmpty) &&
       socialOrientation.isNotEmpty &&
       goingOut.isNotEmpty &&
       livingArrangement.isNotEmpty &&
@@ -287,6 +295,11 @@ class ProfileSetupDraft {
       politicalViews.isNotEmpty &&
       mainPhotoPath != null &&
       isMainPhotoVerified;
+
+  bool get isReadyForRegistrationCompletion =>
+      isRegistrationRequiredComplete &&
+      hasRequiredRegistrationInterests &&
+      hasRequiredRegistrationGalleryPhotos;
 
   ProfileSetupDraft copyWith({
     String? firstName,

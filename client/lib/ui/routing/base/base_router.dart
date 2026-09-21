@@ -31,6 +31,10 @@ abstract interface class BaseRouter {
       '/registration/friendship-only-confirmation';
   static const String registrationReligiosity = '/registration/religiosity';
   static const String registrationComplete = '/registration/complete';
+  static const String registrationInterestCategories =
+      '/registration/interests/categories';
+  static const String registrationInterestPicker =
+      '/registration/interests/picker';
   static const String profileBuilder = '/profile-builder';
   static const String profileBuilderGallery = '/profile-builder/gallery';
   static const String termsOfService = '/legal/terms-of-service';

@@ -31,8 +31,8 @@ provider tokens, or backend credentials. The iOS Device SDK handles encrypted
 session blobs transiently in native memory only.
 
 In debug builds only, triple-tap the navy welcome area above the sign-in panel
-to preview the next phone-verification screen. This flow-preview shortcut is
-not included in release builds.
+to preview the Consent screen. This flow-preview shortcut is not included in
+release builds.
 
 The local phone-verification preview accepts only `012345` as its verification
 code, then opens the following age-eligibility mock screen. It does not send
@@ -42,15 +42,19 @@ The age-eligibility preview accepts a real calendar date in `DD.MM.YYYY`
 format only when the user is at least 18, then opens the consent placeholder.
 
 The consent preview enables Continue only after both document switches are on,
-then opens the identity-verification placeholder. It stores no consent record.
+then opens the core-details stage. It stores no consent record.
 
-After the profile-detail flow, registration uses the on-device photo-library
-picker. The selected main and optional gallery photos are uploaded directly to
-their private Firebase Storage staging paths. The app then sends only generated
-photo IDs, Firebase Authentication, and App Check tokens to Cloud Run. It
-polls an opaque photo-verification token before opening About Me. Gallery
-photos are private uploads only; only the main photo is a future FaceTec match
-candidate.
+After the profile-attribute flow, registration requires a main photo and its
+private verification workflow. The app sends only generated main-photo IDs,
+Firebase Authentication, and App Check tokens to Cloud Run, then polls an
+opaque verification token. After all attributes are collected, the final local
+registration gate requires at least five interests and two gallery photos.
+
+The interests flow provides a local preview catalogue of the 33 required
+categories. Selected interest names remain canonical within the local draft
+even when shown under multiple categories. Gallery selections are still
+device-local in this mobile preview; durable gallery media and interest
+persistence require their own approved backend contracts.
 
 The backend starts in `approval_override` mode. Its `approved` response allows
 this preview flow to continue but is not a genuine FaceTec 3D:2D match and does
@@ -99,9 +103,11 @@ The Debug build copies that local file into the signed app bundle at build time.
 Do not commit the SDKs, this file, or any FaceTec credentials. Android remains
 unavailable until its Device SDK is added in a separate change.
 
-On an iOS Simulator, the native bridge deliberately skips FaceTec and returns a
-successful verification outcome so the registration flow can be previewed. A
-physical iOS device still runs the FaceTec Test API check.
+On an iOS Simulator, the app deliberately skips FaceTec. It still uploads the
+chosen main photo to its private staging path, but photo validation is approved
+only in memory and is never sent to Cloud Run as a claimed FaceTec result. This
+keeps the registration UI previewable without creating a false server-side
+verification. A physical iOS device still runs the FaceTec Test API check.
 
 The current default transport is `direct_test`, which preserves that Test API
 preview. After the backend has a validated production FaceTec adapter, switch

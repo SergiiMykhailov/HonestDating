@@ -354,7 +354,7 @@ class _ProfileBuilderGalleryScreenState
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
                 children: [
                   const Text(
-                    'Add more photos',
+                    'Add gallery photos',
                     style: TextStyle(
                       color: AppColors.ink,
                       fontSize: 30,
@@ -365,7 +365,7 @@ class _ProfileBuilderGalleryScreenState
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Gallery photos are optional. You can select up to 10 on this device.',
+                    'Add at least 2 additional photos to complete registration. You can select up to 10.',
                     style: TextStyle(
                       color: AppColors.mutedInk,
                       fontSize: 16,

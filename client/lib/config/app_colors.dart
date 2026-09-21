@@ -4,6 +4,7 @@ abstract final class AppColors {
   static const Color navy = Color(0xFF140A58);
   static const Color coral = Color(0xFFF2405B);
   static const Color coralSoft = Color(0xFFFFE8EC);
+  static const Color warning = Color(0xFFE88A22);
   static const Color plum = Color(0xFF86228C);
   static const Color ink = Color(0xFF1C1C22);
   static const Color mutedInk = Color(0xFF777784);

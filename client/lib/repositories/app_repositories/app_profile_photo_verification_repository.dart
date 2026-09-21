@@ -31,16 +31,20 @@ class AppProfilePhotoVerificationRepository
   final http.Client _client;
   final BaseIdentityVerificationRepository _identityVerificationRepository;
   final Random _random = Random.secure();
+  final Set<String> _simulatorPreviewVerificationTokens = <String>{};
 
   @override
   Future<ProfilePhotoVerificationSession> uploadAndStartVerification({
     required String mainPhotoPath,
     required List<String> galleryPhotoPaths,
   }) async {
+    final isSimulatorPreview = await _identityVerificationRepository
+        .isLivenessCheckSkippedOnCurrentDevice();
     final livenessVerificationToken =
         _identityVerificationRepository.activeLivenessVerificationToken;
-    if (livenessVerificationToken == null ||
-        livenessVerificationToken.isEmpty) {
+    if (!isSimulatorPreview &&
+        (livenessVerificationToken == null ||
+            livenessVerificationToken.isEmpty)) {
       throw const ProfilePhotoVerificationException(
         'Complete the selfie check before adding profile photos.',
       );
@@ -49,6 +53,20 @@ class AppProfilePhotoVerificationRepository
     final galleryPhotos = <StagedProfilePhoto>[];
     for (final photoPath in galleryPhotoPaths) {
       galleryPhotos.add(await _uploadPhoto(photoPath, isMain: false));
+    }
+
+    // A simulator has no trustworthy FaceTec liveness result. Keep its image
+    // upload coverage, but never send a client-declared simulator bypass to
+    // Cloud Run. The in-memory preview session advances only this local flow.
+    if (isSimulatorPreview) {
+      final token = 'simulator-preview-${_newPhotoID()}';
+      _simulatorPreviewVerificationTokens.add(token);
+      return ProfilePhotoVerificationSession(
+        verificationToken: token,
+        status: ProfilePhotoVerificationStatus.pending,
+        mainPhoto: mainPhoto,
+        galleryPhotos: List<StagedProfilePhoto>.unmodifiable(galleryPhotos),
+      );
     }
 
     final response =
@@ -80,6 +98,9 @@ class AppProfilePhotoVerificationRepository
   Future<ProfilePhotoVerificationStatus> getVerificationStatus(
     String verificationToken,
   ) async {
+    if (_simulatorPreviewVerificationTokens.contains(verificationToken)) {
+      return ProfilePhotoVerificationStatus.approved;
+    }
     final encodedToken = Uri.encodeComponent(verificationToken);
     final response = await _get(
       '/v1/profile-photo-verifications/$encodedToken',

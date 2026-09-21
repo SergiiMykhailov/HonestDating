@@ -22,7 +22,9 @@ import 'package:honest_dating/ui/screens/registration_flow/bloc/registration_cor
 import 'package:honest_dating/ui/screens/registration_flow/registration_complete_screen.dart';
 import 'package:honest_dating/ui/screens/registration_flow/registration_conditional_screens.dart';
 import 'package:honest_dating/ui/screens/registration_flow/registration_core_details_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/interest_catalog_screens.dart';
 import 'package:honest_dating/ui/screens/registration_flow/registration_main_photo_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/required_profile_completion_screen.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
 
 class MainRouter implements BaseRouter {
@@ -154,8 +156,19 @@ class MainRouter implements BaseRouter {
               repository: _repositoriesFactory.makeProfileSetupRepository(),
             );
           case BaseRouter.registrationComplete:
-            return RegistrationCompleteScreen(
+            return RequiredProfileCompletionScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.registrationInterestCategories:
+            return InterestCategoriesScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.registrationInterestPicker:
+            return InterestCatalogPickerScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+              arguments: settings.arguments is InterestCatalogPickerArguments
+                  ? settings.arguments! as InterestCatalogPickerArguments
+                  : const InterestCatalogPickerArguments(),
             );
           case BaseRouter.profileBuilder:
             return ProfileBuilderScreen(
