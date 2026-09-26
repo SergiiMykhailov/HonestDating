@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
+import 'package:honest_dating/models/discovery_profile.dart';
 import 'package:honest_dating/models/profile_photo_verification.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/main/discover/discover_screen.dart';
+import 'package:honest_dating/ui/screens/main/discover/discovery_profile_preview_screen.dart';
 import 'package:honest_dating/ui/screens/main/main_shell.dart';
+import 'package:honest_dating/ui/screens/launch/launch_screen.dart';
 import 'package:honest_dating/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:honest_dating/ui/screens/registration/age_eligibility_screen.dart';
 import 'package:honest_dating/ui/screens/registration/consent_screen.dart';
@@ -24,6 +27,7 @@ import 'package:honest_dating/ui/screens/registration_flow/registration_conditio
 import 'package:honest_dating/ui/screens/registration_flow/registration_core_details_screen.dart';
 import 'package:honest_dating/ui/screens/registration_flow/interest_catalog_screens.dart';
 import 'package:honest_dating/ui/screens/registration_flow/registration_main_photo_screen.dart';
+import 'package:honest_dating/ui/screens/registration_flow/registration_optional_profile_screens.dart';
 import 'package:honest_dating/ui/screens/registration_flow/required_profile_completion_screen.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
 
@@ -34,17 +38,54 @@ class MainRouter implements BaseRouter {
   final BaseRepositoriesFactory _repositoriesFactory;
 
   @override
-  Route<void> onGenerateRoute(RouteSettings settings) {
+  Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    if (settings.name == BaseRouter.profilePhotoValidation) {
+      final session = settings.arguments;
+      return CupertinoPageRoute<bool?>(
+        settings: settings,
+        builder: (BuildContext context) {
+          if (session is! ProfilePhotoVerificationSession) {
+            return const PlaceholderScreen(
+              title: 'Photo validation',
+              message:
+                  'Start again from your photos to validate your profile photo.',
+            );
+          }
+          return ProfilePhotoValidationScreen(
+            repository: _repositoriesFactory
+                .makeProfilePhotoVerificationRepository(),
+            profileSetupRepository: _repositoriesFactory
+                .makeProfileSetupRepository(),
+            session: session,
+          );
+        },
+      );
+    }
+
     return CupertinoPageRoute<void>(
       settings: settings,
       builder: (BuildContext context) {
         switch (settings.name) {
+          case BaseRouter.launch:
+            return LaunchScreen(
+              accountRepository: _repositoriesFactory
+                  .makeAuthenticatedAccountRepository(),
+            );
           case BaseRouter.home:
             return MainShell(repositoriesFactory: _repositoriesFactory);
           case BaseRouter.discover:
             return DiscoverScreen(
               repository: _repositoriesFactory.makeDiscoveryRepository(),
             );
+          case BaseRouter.discoveryProfile:
+            final profile = settings.arguments;
+            if (profile is! DiscoveryProfile) {
+              return const PlaceholderScreen(
+                title: 'Profile',
+                message: 'Return to Discover and choose a profile to continue.',
+              );
+            }
+            return DiscoveryProfilePreviewScreen(profile: profile);
           case BaseRouter.likes:
             return const PlaceholderScreen(
               title: 'Likes',
@@ -104,22 +145,6 @@ class MainRouter implements BaseRouter {
               verificationRepository: _repositoriesFactory
                   .makeProfilePhotoVerificationRepository(),
             );
-          case BaseRouter.profilePhotoValidation:
-            final session = settings.arguments;
-            if (session is! ProfilePhotoVerificationSession) {
-              return const PlaceholderScreen(
-                title: 'Photo validation',
-                message:
-                    'Start again from your photos to validate your profile photo.',
-              );
-            }
-            return ProfilePhotoValidationScreen(
-              repository: _repositoriesFactory
-                  .makeProfilePhotoVerificationRepository(),
-              profileSetupRepository: _repositoriesFactory
-                  .makeProfileSetupRepository(),
-              session: session,
-            );
           case BaseRouter.profileAboutMe:
             return ProfileAboutMeScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
@@ -155,7 +180,19 @@ class MainRouter implements BaseRouter {
             return RegistrationReligiosityScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
             );
+          case BaseRouter.registrationInterests:
+            return RegistrationInterestsScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.registrationGalleryPhotos:
+            return RegistrationGalleryPhotosScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
           case BaseRouter.registrationComplete:
+            return RegistrationCompleteScreen(
+              repository: _repositoriesFactory.makeProfileSetupRepository(),
+            );
+          case BaseRouter.requiredProfileCompletionLegacy:
             return RequiredProfileCompletionScreen(
               repository: _repositoriesFactory.makeProfileSetupRepository(),
             );
@@ -192,6 +229,8 @@ class MainRouter implements BaseRouter {
           default:
             return OnboardingScreen(
               repository: _repositoriesFactory.makeAuthenticationRepository(),
+              accountRepository: _repositoriesFactory
+                  .makeAuthenticatedAccountRepository(),
             );
         }
       },

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/models/authentication_provider.dart';
+import 'package:honest_dating/repositories/base/base_authenticated_account_repository.dart';
 import 'package:honest_dating/repositories/base/base_authentication_repository.dart';
 import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
@@ -18,9 +19,12 @@ class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({
     super.key,
     required BaseAuthenticationRepository repository,
-  }) : _repository = repository;
+    required BaseAuthenticatedAccountRepository accountRepository,
+  }) : _repository = repository,
+       _accountRepository = accountRepository;
 
   final BaseAuthenticationRepository _repository;
+  final BaseAuthenticatedAccountRepository _accountRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +33,16 @@ class OnboardingScreen extends StatelessWidget {
       child: BlocProvider<OnboardingScreenBloc>(
         create: (BuildContext context) =>
             OnboardingScreenBloc(repository: _repository),
-        child: const _OnboardingView(),
+        child: _OnboardingView(accountRepository: _accountRepository),
       ),
     );
   }
 }
 
 class _OnboardingView extends StatelessWidget {
-  const _OnboardingView();
+  const _OnboardingView({required this.accountRepository});
+
+  final BaseAuthenticatedAccountRepository accountRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,7 @@ class _OnboardingView extends StatelessWidget {
           (OnboardingScreenState previous, OnboardingScreenState next) =>
               next is OnboardingAuthenticated,
       listener: (BuildContext context, OnboardingScreenState state) {
-        Navigator.of(context).pushNamed(BaseRouter.consent);
+        _continueAfterAuthentication(context);
       },
       child: SafeArea(
         bottom: false,
@@ -97,6 +103,27 @@ class _OnboardingView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _continueAfterAuthentication(BuildContext context) async {
+    var hasCompletedRegistration = false;
+    try {
+      hasCompletedRegistration = await accountRepository
+          .hasCompletedMobileRegistration();
+    } catch (_) {
+      hasCompletedRegistration = false;
+    }
+    if (!context.mounted) {
+      return;
+    }
+    if (hasCompletedRegistration) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        BaseRouter.home,
+        (Route<dynamic> route) => false,
+      );
+      return;
+    }
+    Navigator.of(context).pushNamed(BaseRouter.consent);
   }
 }
 

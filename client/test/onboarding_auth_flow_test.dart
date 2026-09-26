@@ -64,6 +64,9 @@ class _AuthenticationRepositoryStub implements BaseAuthenticationRepository {
   final AuthenticationStartResult _result;
 
   @override
+  Future<bool> beginDebugPreviewAuthentication() async => false;
+
+  @override
   Future<AuthenticationStartResult> beginSocialAuthentication(
     AuthenticationProvider provider,
   ) async => _result;

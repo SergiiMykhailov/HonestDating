@@ -12,8 +12,9 @@ class HonestDatingApp extends StatelessWidget {
 
     return CupertinoApp(
       title: 'Honest Dating',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.cupertino,
-      initialRoute: BaseRouter.onboarding,
+      initialRoute: BaseRouter.launch,
       onGenerateRoute: router.onGenerateRoute,
     );
   }

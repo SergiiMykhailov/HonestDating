@@ -22,6 +22,11 @@ in this repository.
   private photo IDs, creates an opaque validation token, and returns `pending`.
 - `GET /v1/profile-photo-verifications/{token}` returns only the authenticated
   owner's opaque workflow status.
+- `POST /v1/debug-preview-auth` is disabled by default. When explicitly
+  enabled for debug-only mobile testing, it verifies Firebase Authentication
+  and App Check, then returns a short-lived custom token for the one canonical
+  `folia.dummy@gmail.com` test account. It neither accepts nor stores a
+  password, Google credential, or client-selected UID.
 - `POST /events/storage` accepts authenticated Eventarc Cloud Storage
   finalization events for private profile-photo staging objects and records
   their private verification state.
@@ -43,6 +48,7 @@ one minimum instance. Configure these non-secret environment values:
 | --- | --- |
 | `GOOGLE_CLOUD_PROJECT` | Firebase / Google Cloud project ID. Set this explicitly on the Cloud Run service. |
 | `FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket receiving private staged photos. |
+| `DEBUG_PREVIEW_AUTH_ENABLED` | Defaults to `false`. Set to `true` only while the debug-only shared `folia.dummy@gmail.com` mobile preview is needed. |
 | `FACETEC_PROVIDER_MODE` | `unconfigured` by default; `adapter_contract_pending` reserves the runtime configuration for a future official adapter but does not create one. |
 | `FACETEC_DECISION_MODE` | `approval_override` by default. Change explicitly to `enforce` only after production FaceTec setup has been validated. |
 | `FACETEC_SERVER_URL` | Optional runtime-only FaceTec Server URL for a future official adapter. |
@@ -51,7 +57,10 @@ one minimum instance. Configure these non-secret environment values:
 
 The service uses Application Default Credentials. Give its dedicated service
 account only the roles required to verify Firebase tokens and write the private
-Firestore documents. Do not commit a service-account key.
+Firestore documents. When `DEBUG_PREVIEW_AUTH_ENABLED=true`, grant that same
+service account permission to sign Firebase custom tokens for itself (the
+minimum required IAM permission is `iam.serviceAccounts.signBlob`). Do not
+commit a service-account key.
 
 The service is deliberately publicly reachable so the mobile app can call it
 directly. Firebase Authentication and App Check verification remain mandatory

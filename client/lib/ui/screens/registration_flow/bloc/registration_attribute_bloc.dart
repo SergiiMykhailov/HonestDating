@@ -7,7 +7,7 @@ enum RegistrationAttributeDestination {
   nextAttribute,
   friendshipOnlyConfirmation,
   religiosity,
-  registrationComplete,
+  registrationInterests,
 }
 
 sealed class RegistrationAttributeEvent {
@@ -251,7 +251,7 @@ class RegistrationAttributeBloc
     _emitNavigation(
       emit,
       state.step.next == null
-          ? RegistrationAttributeDestination.registrationComplete
+          ? RegistrationAttributeDestination.registrationInterests
           : RegistrationAttributeDestination.nextAttribute,
     );
   }

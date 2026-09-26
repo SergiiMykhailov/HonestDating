@@ -1,22 +1,60 @@
+import 'dart:convert';
+
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:honest_dating/config/backend_configuration.dart';
 import 'package:honest_dating/models/authentication_provider.dart';
 import 'package:honest_dating/models/authentication_start_result.dart';
 import 'package:honest_dating/repositories/base/base_authenticated_account_repository.dart';
 import 'package:honest_dating/repositories/base/base_authentication_repository.dart';
+import 'package:http/http.dart' as http;
 
 class AppAuthenticationRepository implements BaseAuthenticationRepository {
   AppAuthenticationRepository({
     required BaseAuthenticatedAccountRepository authenticatedAccountRepository,
     FirebaseAuth? auth,
+    FirebaseAppCheck? appCheck,
+    http.Client? client,
   }) : _authenticatedAccountRepository = authenticatedAccountRepository,
-       _auth = auth ?? FirebaseAuth.instance;
+       _auth = auth ?? FirebaseAuth.instance,
+       _appCheck = appCheck ?? FirebaseAppCheck.instance,
+       _client = client ?? http.Client();
 
   static Future<void>? _googleInitialization;
 
   final FirebaseAuth _auth;
+  final FirebaseAppCheck _appCheck;
+  final http.Client _client;
   final BaseAuthenticatedAccountRepository _authenticatedAccountRepository;
+
+  @override
+  Future<bool> beginDebugPreviewAuthentication() async {
+    if (!kDebugMode) {
+      return false;
+    }
+    try {
+      if (_auth.currentUser == null) {
+        await _auth.signInAnonymously();
+      }
+      final customToken = await _requestDebugPreviewCustomToken();
+      if (customToken == null) {
+        return false;
+      }
+      final credential = await _auth.signInWithCustomToken(customToken);
+      final user = credential.user ?? _auth.currentUser;
+      if (user == null) {
+        return false;
+      }
+      await _authenticatedAccountRepository.ensureDebugPreviewAccount(user.uid);
+      return true;
+    } on FirebaseAuthException {
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<AuthenticationStartResult> beginSocialAuthentication(
@@ -86,6 +124,38 @@ class AppAuthenticationRepository implements BaseAuthenticationRepository {
         status: AuthenticationStartStatus.failed,
       );
     }
+  }
+
+  Future<String?> _requestDebugPreviewCustomToken() async {
+    final endpoint = BackendConfiguration.endpoint('/v1/debug-preview-auth');
+    if (endpoint == null) {
+      return null;
+    }
+    final idToken = await _auth.currentUser?.getIdToken();
+    final appCheckToken = await _appCheck.getToken();
+    if (idToken == null ||
+        idToken.isEmpty ||
+        appCheckToken == null ||
+        appCheckToken.isEmpty) {
+      return null;
+    }
+
+    final response = await _client.post(
+      endpoint,
+      headers: <String, String>{
+        'Authorization': 'Bearer $idToken',
+        'X-Firebase-AppCheck': appCheckToken,
+      },
+    );
+    if (response.statusCode != 200) {
+      return null;
+    }
+    final responseBody = jsonDecode(response.body);
+    if (responseBody is! Map<Object?, Object?>) {
+      return null;
+    }
+    final customToken = responseBody['customToken'];
+    return customToken is String && customToken.isNotEmpty ? customToken : null;
   }
 
   Future<UserCredential> _signInWithGoogle() async {

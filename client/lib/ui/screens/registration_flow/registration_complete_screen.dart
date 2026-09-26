@@ -120,7 +120,7 @@ class _RegistrationCompleteScreenState
                           const SizedBox(height: 12),
                           Text(
                             _isReady
-                                ? 'Your Honest Dating account is ready. One thing to do next: make your profile more complete. Start by adding your interests. They help people discover you based on shared interests in Discover, help you target your Target Me posts more effectively, and allow you to receive Target Me posts targeted to your interests. There are 33 categories to explore, with a wide range of interests to choose from. You can add as many as you like, and you can always add more later. You can also add more photos and an About Me to give people a better sense of who you are. You don’t have to do everything now. You can add interests, photos, and your About Me whenever you have time.'
+                                ? 'Your account is ready. You can add or update the rest of your profile anytime.'
                                 : 'Some required registration details are missing. Go back and complete them before starting.',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
@@ -130,33 +130,17 @@ class _RegistrationCompleteScreenState
                             ),
                           ),
                           const Spacer(),
-                          if (_isReady) ...[
+                          if (_isReady)
                             AppPrimaryButton(
-                              label: 'Build Profile',
-                              onPressed: () {
-                                Navigator.of(
-                                  context,
-                                ).pushNamed(BaseRouter.profileBuilder);
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            CupertinoButton(
+                              label: 'Start Dating',
                               onPressed: () {
                                 Navigator.of(context).pushNamedAndRemoveUntil(
                                   BaseRouter.home,
                                   (Route<dynamic> route) => false,
                                 );
                               },
-                              child: const Text(
-                                'Start Dating',
-                                style: TextStyle(
-                                  color: AppColors.coral,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ] else
+                            )
+                          else
                             AppPrimaryButton(
                               label: 'Go back',
                               onPressed: () => Navigator.of(context).maybePop(),
@@ -365,7 +349,7 @@ class _ProfileBuilderGalleryScreenState
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Add at least 2 additional photos to complete registration. You can select up to 10.',
+                    'Add up to 10 optional photos. You can come back and manage them later.',
                     style: TextStyle(
                       color: AppColors.mutedInk,
                       fontSize: 16,

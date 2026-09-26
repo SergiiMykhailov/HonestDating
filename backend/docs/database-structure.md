@@ -7,7 +7,10 @@ server-owned. Firebase Firestore and Storage rules deny client access to it.
 ## `users/{uid}`
 
 Created by the authenticated mobile client immediately after Firebase social
-sign-in. The user may read this exact document and refresh `updatedAt`; no
+sign-in. In debug builds only, the triple-tap preview path exchanges an
+App-Check-attested anonymous bootstrap session for a server-minted custom token
+for one canonical owner. The owner-only document uses the fixed dummy email
+identifier. The user may read this exact document and refresh `updatedAt`; no
 other client writes or collection-listing access are permitted. It contains no
 profile, biometric, consent, payment, or provider-token data.
 
@@ -16,6 +19,27 @@ profile, biometric, consent, payment, or provider-token data.
 | `schemaVersion` | number | Current format version (`1`). |
 | `createdAt` | timestamp | First authenticated app access, set by Firestore server time. |
 | `updatedAt` | timestamp | Most recent authenticated app access, set by Firestore server time. |
+| `email` | string, optional | Fixed `folia.dummy@gmail.com` identifier in the canonical debug-preview account only. It is not a Firebase email/password credential. |
+| `accountKind` | string, optional | `debugPreview` for the canonical debug-preview account only. |
+| `registrationCompletedAt` | timestamp, optional | Set once by the authenticated owner when mobile registration completes; used only to restore the signed-in app entry point. |
+
+## `systemDebugPreviewAccounts/folia`
+
+Created and read only by the Go Cloud Run service when
+`DEBUG_PREVIEW_AUTH_ENABLED=true`. Client Firestore rules default-deny this
+path. It maps eligible debug bootstrap identities and the exact Google identity
+`folia.dummy@gmail.com` to one canonical Firebase UID. The endpoint returns a
+short-lived Firebase custom token for that UID only after verifying both the
+caller's Firebase ID token and App Check token.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `schemaVersion` | number | Current format version (`1`). |
+| `canonicalUID` | string | Firebase Auth UID that owns the shared debug test account. |
+| `createdAt` / `updatedAt` | timestamp | Server timestamps. |
+
+No Firebase password, Google credential, raw ID token, App Check token, or
+custom token is stored in this document.
 
 ## `users/{uid}/private/identityVerification`
 

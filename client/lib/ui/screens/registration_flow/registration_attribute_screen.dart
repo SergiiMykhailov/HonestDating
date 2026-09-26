@@ -58,10 +58,10 @@ class _RegistrationAttributeView extends StatelessWidget {
                   Navigator.of(
                     context,
                   ).pushNamed(BaseRouter.registrationReligiosity);
-                case RegistrationAttributeDestination.registrationComplete:
+                case RegistrationAttributeDestination.registrationInterests:
                   Navigator.of(
                     context,
-                  ).pushNamed(BaseRouter.registrationComplete);
+                  ).pushNamed(BaseRouter.registrationInterests);
                 case null:
                   break;
               }

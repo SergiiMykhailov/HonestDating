@@ -26,6 +26,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
+	mux.HandleFunc("POST /v1/debug-preview-auth", service.StartDebugPreviewAuthentication)
 	// The identity-verifications routes are the stable mobile contract. Keep
 	// the original enrollment route temporarily so existing debug builds do
 	// not break during this client migration.

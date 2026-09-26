@@ -9,6 +9,7 @@ class DiscoverScreenBloc
     : _repository = repository,
       super(const DiscoverScreenLoading()) {
     on<DiscoverScreenLoadRequested>(_onLoadRequested);
+    on<DiscoverProfilePositionChanged>(_onProfilePositionChanged);
   }
 
   final BaseDiscoveryRepository _repository;
@@ -23,5 +24,24 @@ class DiscoverScreenBloc
     } catch (_) {
       emit(const DiscoverScreenFailure());
     }
+  }
+
+  void _onProfilePositionChanged(
+    DiscoverProfilePositionChanged event,
+    Emitter<DiscoverScreenState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is! DiscoverScreenLoaded ||
+        event.index < 0 ||
+        event.index >= currentState.profiles.length ||
+        event.index == currentState.currentIndex) {
+      return;
+    }
+    emit(
+      DiscoverScreenLoaded(
+        profiles: currentState.profiles,
+        currentIndex: event.index,
+      ),
+    );
   }
 }

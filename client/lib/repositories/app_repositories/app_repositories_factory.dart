@@ -15,14 +15,21 @@ import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
 class AppRepositoriesFactory implements BaseRepositoriesFactory {
   final BaseAuthenticatedAccountRepository _authenticatedAccountRepository =
       AppAuthenticatedAccountRepository();
-  final BaseProfileSetupRepository _profileSetupRepository =
-      AppProfileSetupRepository();
+  late final BaseProfileSetupRepository _profileSetupRepository =
+      AppProfileSetupRepository(
+        authenticatedAccountRepository: _authenticatedAccountRepository,
+      );
   final BaseIdentityVerificationRepository _identityVerificationRepository =
       AppIdentityVerificationRepository();
   late final BaseProfilePhotoVerificationRepository
   _profilePhotoVerificationRepository = AppProfilePhotoVerificationRepository(
     identityVerificationRepository: _identityVerificationRepository,
   );
+
+  @override
+  BaseAuthenticatedAccountRepository makeAuthenticatedAccountRepository() {
+    return _authenticatedAccountRepository;
+  }
 
   @override
   BaseAuthenticationRepository makeAuthenticationRepository() {

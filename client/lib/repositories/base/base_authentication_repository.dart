@@ -5,4 +5,8 @@ abstract interface class BaseAuthenticationRepository {
   Future<AuthenticationStartResult> beginSocialAuthentication(
     AuthenticationProvider provider,
   );
+
+  /// Debug-only preview authentication used by the onboarding triple-tap
+  /// shortcut. Production entry remains social-provider only.
+  Future<bool> beginDebugPreviewAuthentication();
 }

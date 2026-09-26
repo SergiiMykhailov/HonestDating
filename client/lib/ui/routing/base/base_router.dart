@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 
 abstract interface class BaseRouter {
+  static const String launch = '/launch';
   static const String onboarding = '/onboarding';
   static const String home = '/home';
   static const String discover = '/discover';
+  static const String discoveryProfile = '/discover/profile';
   static const String likes = '/likes';
   static const String matches = '/matches';
   static const String messages = '/messages';
@@ -30,7 +32,12 @@ abstract interface class BaseRouter {
   static const String registrationFriendshipOnlyConfirmation =
       '/registration/friendship-only-confirmation';
   static const String registrationReligiosity = '/registration/religiosity';
+  static const String registrationInterests = '/registration/interests';
+  static const String registrationGalleryPhotos =
+      '/registration/gallery-photos';
   static const String registrationComplete = '/registration/complete';
+  static const String requiredProfileCompletionLegacy =
+      '/registration/required-profile-completion';
   static const String registrationInterestCategories =
       '/registration/interests/categories';
   static const String registrationInterestPicker =
@@ -40,5 +47,5 @@ abstract interface class BaseRouter {
   static const String termsOfService = '/legal/terms-of-service';
   static const String privacyPolicy = '/legal/privacy-policy';
 
-  Route<void> onGenerateRoute(RouteSettings settings);
+  Route<dynamic> onGenerateRoute(RouteSettings settings);
 }

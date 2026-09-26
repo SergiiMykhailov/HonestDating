@@ -42,6 +42,12 @@
   that handles user data must verify Firebase Authentication and App Check in
   Go. Only `GET /health` may be unauthenticated and it must expose readiness
   only.
+- Keep `DEBUG_PREVIEW_AUTH_ENABLED` disabled by default. If the product owner
+  explicitly enables the debug-only shared preview account, its endpoint must
+  continue to verify both Firebase Authentication and App Check, mint only a
+  short-lived custom token for the fixed test UID, and never accept a password
+  or client-selected UID. Grant the runtime service account only the required
+  `iam.serviceAccounts.signBlob` permission for that token minting.
 - Use a dedicated user-managed Cloud Run service account with only the minimum
   permissions required. Do not use a default service account or broad project
   roles such as Owner or Editor.

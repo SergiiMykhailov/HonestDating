@@ -33,7 +33,15 @@ const (
 	storageFinalizedType = "google.cloud.storage.object.v1.finalized"
 	maximumPhotoSize     = 10 * 1024 * 1024
 	maximumFaceTecBlob   = 512 * 1024
+	debugPreviewEmail    = "folia.dummy@gmail.com"
+	debugPreviewClaim    = "debugPreview"
 )
+
+const debugPreviewAccountPath = "systemDebugPreviewAccounts/folia"
+
+type debugPreviewAuthenticationResponse struct {
+	CustomToken string `json:"customToken"`
+}
 
 type profilePhotoVerificationRequest struct {
 	MainPhotoID               string   `json:"mainPhotoId"`
@@ -45,13 +53,14 @@ type profilePhotoVerificationRequest struct {
 // Default Credentials, so client Firestore and Storage rules never need to
 // grant access to identity or verification data.
 type Service struct {
-	appCheck      *appcheck.Client
-	auth          *auth.Client
-	firestore     *firestore.Client
-	storage       *storage.Client
-	storageBucket string
-	faceTec       config.FaceTecConfig
-	provider      FaceTecProvider
+	appCheck                *appcheck.Client
+	auth                    *auth.Client
+	firestore               *firestore.Client
+	storage                 *storage.Client
+	storageBucket           string
+	debugPreviewAuthEnabled bool
+	faceTec                 config.FaceTecConfig
+	provider                FaceTecProvider
 }
 
 // NewService creates the Firebase Admin clients for a Cloud Run deployment.
@@ -80,14 +89,52 @@ func NewService(ctx context.Context, cfg config.Config) (*Service, error) {
 	}
 
 	return &Service{
-		appCheck:      appCheckClient,
-		auth:          authClient,
-		firestore:     firestoreClient,
-		storage:       storageClient,
-		storageBucket: cfg.StorageBucket,
-		faceTec:       cfg.FaceTec,
-		provider:      unconfiguredFaceTecProvider{},
+		appCheck:                appCheckClient,
+		auth:                    authClient,
+		firestore:               firestoreClient,
+		storage:                 storageClient,
+		storageBucket:           cfg.StorageBucket,
+		debugPreviewAuthEnabled: cfg.DebugPreviewAuthEnabled,
+		faceTec:                 cfg.FaceTec,
+		provider:                unconfiguredFaceTecProvider{},
 	}, nil
+}
+
+// StartDebugPreviewAuthentication exchanges a Firebase-authenticated debug
+// bootstrap session for a custom token for the canonical test account. It is
+// disabled unless an operator explicitly enables it at runtime. The endpoint
+// requires both Firebase Authentication and App Check; it never accepts an
+// email, password, or client-selected UID.
+func (s *Service) StartDebugPreviewAuthentication(w http.ResponseWriter, r *http.Request) {
+	if !s.debugPreviewAuthEnabled {
+		writeError(w, http.StatusNotFound, "The debug preview authentication service is unavailable.")
+		return
+	}
+
+	decodedToken, ok := s.requireAuthenticatedAppToken(w, r)
+	if !ok {
+		return
+	}
+	if !isDebugPreviewIdentity(decodedToken) {
+		writeError(w, http.StatusForbidden, "This sign-in is not eligible for the debug preview account.")
+		return
+	}
+
+	canonicalUID, err := s.debugPreviewCanonicalUID(r.Context(), decodedToken.UID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "The debug preview account could not be prepared.")
+		return
+	}
+	customToken, err := s.auth.CustomTokenWithClaims(r.Context(), canonicalUID, map[string]interface{}{
+		debugPreviewClaim: true,
+	})
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "The debug preview account could not be prepared.")
+		return
+	}
+
+	w.Header().Set("Cache-Control", "no-store")
+	writeJSON(w, http.StatusOK, debugPreviewAuthenticationResponse{CustomToken: customToken})
 }
 
 // Close releases the Firestore client during a graceful Cloud Run shutdown.
@@ -431,28 +478,85 @@ func (s *Service) HandleStorageFinalized(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *Service) requireAuthenticatedApp(w http.ResponseWriter, r *http.Request) (string, bool) {
+	decodedIDToken, ok := s.requireAuthenticatedAppToken(w, r)
+	if !ok {
+		return "", false
+	}
+	return decodedIDToken.UID, true
+}
+
+func (s *Service) requireAuthenticatedAppToken(w http.ResponseWriter, r *http.Request) (*auth.Token, bool) {
 	idToken, ok := bearerToken(r.Header.Get("Authorization"))
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "Authentication is required.")
-		return "", false
+		return nil, false
 	}
 	decodedIDToken, err := s.auth.VerifyIDToken(r.Context(), idToken)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, "Authentication is required.")
-		return "", false
+		return nil, false
 	}
+	if !s.requireAppCheck(w, r) {
+		return nil, false
+	}
+	return decodedIDToken, true
+}
 
+func (s *Service) requireAppCheck(w http.ResponseWriter, r *http.Request) bool {
 	appCheckToken := strings.TrimSpace(r.Header.Get(appCheckHeader))
 	if appCheckToken == "" {
 		writeError(w, http.StatusUnauthorized, "App verification is required.")
-		return "", false
+		return false
 	}
 	if _, err := s.appCheck.VerifyToken(appCheckToken); err != nil {
 		writeError(w, http.StatusUnauthorized, "App verification is required.")
-		return "", false
+		return false
 	}
+	return true
+}
 
-	return decodedIDToken.UID, true
+func isDebugPreviewIdentity(token *auth.Token) bool {
+	if token == nil {
+		return false
+	}
+	if token.Firebase.SignInProvider == "anonymous" || token.Claims[debugPreviewClaim] == true {
+		return true
+	}
+	email, _ := token.Claims["email"].(string)
+	return token.Firebase.SignInProvider == "google.com" &&
+		strings.EqualFold(strings.TrimSpace(email), debugPreviewEmail)
+}
+
+// debugPreviewCanonicalUID records the first eligible test identity as the
+// shared account owner. Every later device receives a token for that same UID,
+// so private Storage and verification records retain one owner.
+func (s *Service) debugPreviewCanonicalUID(ctx context.Context, bootstrapUID string) (string, error) {
+	document := s.firestore.Doc(debugPreviewAccountPath)
+	canonicalUID := ""
+	err := s.firestore.RunTransaction(ctx, func(ctx context.Context, transaction *firestore.Transaction) error {
+		snapshot, err := transaction.Get(document)
+		if status.Code(err) == codes.NotFound {
+			canonicalUID = bootstrapUID
+			return transaction.Set(document, map[string]interface{}{
+				"schemaVersion": 1,
+				"canonicalUID":  canonicalUID,
+				"createdAt":     firestore.ServerTimestamp,
+				"updatedAt":     firestore.ServerTimestamp,
+			})
+		}
+		if err != nil {
+			return err
+		}
+		storedUID, _ := snapshot.Data()["canonicalUID"].(string)
+		if strings.TrimSpace(storedUID) == "" {
+			return errors.New("debug preview account has no canonical owner")
+		}
+		canonicalUID = storedUID
+		return transaction.Update(document, []firestore.Update{
+			{Path: "updatedAt", Value: firestore.ServerTimestamp},
+		})
+	})
+	return canonicalUID, err
 }
 
 func (s *Service) photoVerificationStatus(ctx context.Context, uid string) (string, error) {

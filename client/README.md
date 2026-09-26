@@ -20,7 +20,9 @@ screen.
 Firebase Core, Authentication, App Check, Firestore, and Storage are
 initialized by the mobile app. Google sign-in establishes the Firebase user
 required for private Storage uploads and Cloud Run requests. The Discover
-screen remains a local placeholder.
+carousel currently uses local fictional preview profiles. It supports only
+vertical browsing and read-only profile opening; filters and relationship
+actions arrive in later Epic 2 slices.
 
 Server-side Firebase integration lives in [`../backend`](../backend),
 implemented in Go for Cloud Run. Its private verification formats are
@@ -31,8 +33,10 @@ provider tokens, or backend credentials. The iOS Device SDK handles encrypted
 session blobs transiently in native memory only.
 
 In debug builds only, triple-tap the navy welcome area above the sign-in panel
-to preview the Consent screen. This flow-preview shortcut is not included in
-release builds.
+to open Consent immediately. It is a local navigation shortcut and never
+waits for Firebase, Firestore, App Check, or Cloud Run. It is not included in
+release builds. Sign in with the same Google account on each device to use one
+real Firebase account across devices.
 
 The local phone-verification preview accepts only `012345` as its verification
 code, then opens the following age-eligibility mock screen. It does not send

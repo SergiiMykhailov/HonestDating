@@ -3,14 +3,16 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
 // Config contains non-secret Cloud Run deployment configuration.
 type Config struct {
-	ProjectID     string
-	StorageBucket string
-	FaceTec       FaceTecConfig
+	ProjectID               string
+	StorageBucket           string
+	DebugPreviewAuthEnabled bool
+	FaceTec                 FaceTecConfig
 }
 
 // FaceTecConfig is runtime-only provider configuration. Server credentials
@@ -48,6 +50,12 @@ func Load() (Config, error) {
 	if providerMode == "" {
 		providerMode = FaceTecProviderUnconfigured
 	}
+	debugPreviewAuthEnabled, err := optionalBooleanEnvironment(
+		"DEBUG_PREVIEW_AUTH_ENABLED",
+	)
+	if err != nil {
+		return Config{}, err
+	}
 
 	if projectID == "" {
 		return Config{}, fmt.Errorf("missing Google Cloud project ID")
@@ -63,8 +71,9 @@ func Load() (Config, error) {
 	}
 
 	return Config{
-		ProjectID:     projectID,
-		StorageBucket: storageBucket,
+		ProjectID:               projectID,
+		StorageBucket:           storageBucket,
+		DebugPreviewAuthEnabled: debugPreviewAuthEnabled,
 		FaceTec: FaceTecConfig{
 			ProviderMode: providerMode,
 			DecisionMode: decisionMode,
@@ -72,6 +81,18 @@ func Load() (Config, error) {
 			Credential:   strings.TrimSpace(os.Getenv("FACETEC_SERVER_CREDENTIAL")),
 		},
 	}, nil
+}
+
+func optionalBooleanEnvironment(name string) (bool, error) {
+	value := strings.TrimSpace(os.Getenv(name))
+	if value == "" {
+		return false, nil
+	}
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, fmt.Errorf("invalid %s", name)
+	}
+	return parsed, nil
 }
 
 func firstNonEmpty(values ...string) string {

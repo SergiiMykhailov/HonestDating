@@ -7,23 +7,84 @@ service cloud.firestore {
     }
 
     // This is the initial owner-only account record created immediately after
-    // successful Firebase Authentication. No profile or verification data is
-    // client writable yet.
+    // successful Firebase Authentication. Debug builds have one deliberately
+    // constrained anonymous-preview variant. No profile or verification data
+    // is client writable here.
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow create: if isOwner(userId)
-        && request.resource.data.keys().hasOnly([
-          'schemaVersion',
-          'createdAt',
-          'updatedAt',
-        ])
-        && request.resource.data.schemaVersion == 1
-        && request.resource.data.createdAt == request.time
-        && request.resource.data.updatedAt == request.time;
+      allow create: if isOwner(userId) && (
+          (
+            request.resource.data.keys().hasOnly([
+              'schemaVersion',
+              'createdAt',
+              'updatedAt',
+            ])
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time
+          )
+          || (
+            request.auth.token.debugPreview == true
+            &&
+            request.resource.data.keys().hasOnly([
+              'schemaVersion',
+              'email',
+              'accountKind',
+              'createdAt',
+              'updatedAt',
+            ])
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.email == 'folia.dummy@gmail.com'
+            && request.resource.data.accountKind == 'debugPreview'
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time
+          )
+        );
       allow update: if isOwner(userId)
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['updatedAt'])
-        && request.resource.data.updatedAt == request.time;
+          .hasOnly([
+            'updatedAt',
+            'registrationCompletedAt',
+            'email',
+            'accountKind',
+          ])
+        && request.resource.data.updatedAt == request.time
+        && (
+          (
+            !resource.data.keys().hasAll(['email', 'accountKind'])
+            && !request.resource.data.keys().hasAll(['email', 'accountKind'])
+          )
+          || (
+            resource.data.keys().hasAll(['email', 'accountKind'])
+            && request.resource.data.keys().hasAll(['email', 'accountKind'])
+            && request.resource.data.email == resource.data.email
+            && request.resource.data.accountKind == resource.data.accountKind
+          )
+          || (
+            request.auth.token.debugPreview == true
+            && !resource.data.keys().hasAll(['email', 'accountKind'])
+            && request.resource.data.keys().hasAll(['email', 'accountKind'])
+            && request.resource.data.email == 'folia.dummy@gmail.com'
+            && request.resource.data.accountKind == 'debugPreview'
+          )
+        )
+        && (
+          (
+            !resource.data.keys().hasAll(['registrationCompletedAt'])
+            && !request.resource.data.keys().hasAll(['registrationCompletedAt'])
+          )
+          || (
+            resource.data.keys().hasAll(['registrationCompletedAt'])
+            && request.resource.data.keys().hasAll(['registrationCompletedAt'])
+            && request.resource.data.registrationCompletedAt
+              == resource.data.registrationCompletedAt
+          )
+          || (
+            !resource.data.keys().hasAll(['registrationCompletedAt'])
+            && request.resource.data.keys().hasAll(['registrationCompletedAt'])
+            && request.resource.data.registrationCompletedAt == request.time
+          )
+        );
       allow delete: if false;
     }
 

@@ -112,12 +112,7 @@ class AppProfilePhotoVerificationRepository
     String localPath, {
     required bool isMain,
   }) async {
-    final user = _authentication.currentUser;
-    if (user == null) {
-      throw const ProfilePhotoVerificationException(
-        'Please sign in again before uploading photos.',
-      );
-    }
+    final user = await _authenticatedUserForUpload();
     final contentType = _contentTypeFor(localPath);
     if (contentType == null) {
       throw const ProfilePhotoVerificationException(
@@ -142,6 +137,28 @@ class AppProfilePhotoVerificationRepository
         )
         .putFile(file, SettableMetadata(contentType: contentType));
     return photo;
+  }
+
+  // The debug triple-tap shortcut intentionally does not perform sign-in
+  // before opening registration. Obtain an anonymous Firebase session only at
+  // the first protected operation so private Storage still has an owner.
+  Future<User> _authenticatedUserForUpload() async {
+    final currentUser = _authentication.currentUser;
+    if (currentUser != null) {
+      return currentUser;
+    }
+    try {
+      final credential = await _authentication.signInAnonymously();
+      final user = credential.user ?? _authentication.currentUser;
+      if (user != null) {
+        return user;
+      }
+    } on FirebaseAuthException {
+      // Convert Firebase failures into the recoverable photo-flow error below.
+    }
+    throw const ProfilePhotoVerificationException(
+      'We could not start a secure upload session. Please try again.',
+    );
   }
 
   Future<Map<String, dynamic>> _post(

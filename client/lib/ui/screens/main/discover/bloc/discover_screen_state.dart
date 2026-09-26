@@ -9,9 +9,10 @@ final class DiscoverScreenLoading extends DiscoverScreenState {
 }
 
 final class DiscoverScreenLoaded extends DiscoverScreenState {
-  const DiscoverScreenLoaded({required this.profiles});
+  const DiscoverScreenLoaded({required this.profiles, this.currentIndex = 0});
 
   final List<DiscoveryProfile> profiles;
+  final int currentIndex;
 }
 
 final class DiscoverScreenFailure extends DiscoverScreenState {
