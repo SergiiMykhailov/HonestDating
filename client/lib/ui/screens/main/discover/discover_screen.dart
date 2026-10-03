@@ -119,6 +119,7 @@ class _DiscoverProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tabBarInset = MediaQuery.paddingOf(context).bottom;
     return Semantics(
       button: true,
       label: 'Open ${profile.firstName}\'s profile',
@@ -127,6 +128,7 @@ class _DiscoverProfileCard extends StatelessWidget {
         onTap: () {
           Navigator.of(
             context,
+            rootNavigator: true,
           ).pushNamed(BaseRouter.discoveryProfile, arguments: profile);
         },
         child: Stack(
@@ -150,7 +152,7 @@ class _DiscoverProfileCard extends StatelessWidget {
             Positioned(
               left: 24,
               right: 24,
-              bottom: 30,
+              bottom: tabBarInset + 22,
               child: _ProfileCardCaption(profile: profile),
             ),
           ],

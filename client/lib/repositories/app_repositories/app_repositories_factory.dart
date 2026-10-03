@@ -25,6 +25,7 @@ class AppRepositoriesFactory implements BaseRepositoriesFactory {
   _profilePhotoVerificationRepository = AppProfilePhotoVerificationRepository(
     identityVerificationRepository: _identityVerificationRepository,
   );
+  final BaseDiscoveryRepository _discoveryRepository = AppDiscoveryRepository();
 
   @override
   BaseAuthenticatedAccountRepository makeAuthenticatedAccountRepository() {
@@ -40,7 +41,7 @@ class AppRepositoriesFactory implements BaseRepositoriesFactory {
 
   @override
   BaseDiscoveryRepository makeDiscoveryRepository() {
-    return AppDiscoveryRepository();
+    return _discoveryRepository;
   }
 
   @override

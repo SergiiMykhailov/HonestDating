@@ -20,9 +20,13 @@ screen.
 Firebase Core, Authentication, App Check, Firestore, and Storage are
 initialized by the mobile app. Google sign-in establishes the Firebase user
 required for private Storage uploads and Cloud Run requests. The Discover
-carousel currently uses local fictional preview profiles. It supports only
-vertical browsing and read-only profile opening; filters and relationship
-actions arrive in later Epic 2 slices.
+experience currently uses local fictional preview profiles. It supports
+vertical browsing, full profile details, shared 100 Questions answers, and
+device-local Like / Friendship Offer state. A Like and a Friendship Offer both
+require a 50–500 character reason; Like reasons remain private until mutual,
+while Friendship Offer reasons are immediately visible. This preview state is
+not persisted or shared between devices. Filters, real relationship storage,
+connection lists, and messaging arrive in later Epic 2 slices.
 
 Server-side Firebase integration lives in [`../backend`](../backend),
 implemented in Go for Cloud Run. Its private verification formats are
@@ -51,8 +55,8 @@ then opens the core-details stage. It stores no consent record.
 After the profile-attribute flow, registration requires a main photo and its
 private verification workflow. The app sends only generated main-photo IDs,
 Firebase Authentication, and App Check tokens to Cloud Run, then polls an
-opaque verification token. After all attributes are collected, the final local
-registration gate requires at least five interests and two gallery photos.
+opaque verification token. Interests and up to two gallery photos are optional
+during registration and can be added later from profile-building tools.
 
 The interests flow provides a local preview catalogue of the 33 required
 categories. Selected interest names remain canonical within the local draft

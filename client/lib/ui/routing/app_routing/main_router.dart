@@ -6,6 +6,7 @@ import 'package:honest_dating/ui/localization/app_copy.dart';
 import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/main/discover/discover_screen.dart';
 import 'package:honest_dating/ui/screens/main/discover/discovery_profile_preview_screen.dart';
+import 'package:honest_dating/ui/screens/main/discover/discovery_questions_screen.dart';
 import 'package:honest_dating/ui/screens/main/main_shell.dart';
 import 'package:honest_dating/ui/screens/launch/launch_screen.dart';
 import 'package:honest_dating/ui/screens/onboarding/onboarding_screen.dart';
@@ -85,7 +86,19 @@ class MainRouter implements BaseRouter {
                 message: 'Return to Discover and choose a profile to continue.',
               );
             }
-            return DiscoveryProfilePreviewScreen(profile: profile);
+            return DiscoveryProfilePreviewScreen(
+              profile: profile,
+              repository: _repositoriesFactory.makeDiscoveryRepository(),
+            );
+          case BaseRouter.discoveryQuestions:
+            final profile = settings.arguments;
+            if (profile is! DiscoveryProfile) {
+              return const PlaceholderScreen(
+                title: '100 Questions for Us',
+                message: 'Return to a profile to view its shared answers.',
+              );
+            }
+            return DiscoveryQuestionsScreen(profile: profile);
           case BaseRouter.likes:
             return const PlaceholderScreen(
               title: 'Likes',

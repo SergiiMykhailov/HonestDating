@@ -6,6 +6,7 @@ abstract interface class BaseRouter {
   static const String home = '/home';
   static const String discover = '/discover';
   static const String discoveryProfile = '/discover/profile';
+  static const String discoveryQuestions = '/discover/profile/questions';
   static const String likes = '/likes';
   static const String matches = '/matches';
   static const String messages = '/messages';
