@@ -94,8 +94,59 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Public-profile rules are introduced in their own backend slice. Default
-    // deny keeps all data private until those rules are reviewed.
+    // A member's discoverable profile is public only to other authenticated
+    // members. Profile and profile-media writes are server-owned; a mobile
+    // client cannot create, modify, or delete either record.
+    match /users/{userId}/profiles/{profileId} {
+      allow get, list: if request.auth != null;
+
+      match /media/{mediaId} {
+        allow get, list: if request.auth != null;
+      }
+    }
+
+    // Discover loads profiles with a collection-group query. Firestore rules
+    // must authorize that query explicitly; the fixed users path above is not
+    // sufficient for a collection-group read.
+    match /{path=**}/profiles/{profileId} {
+      allow get, list: if request.auth != null;
+    }
+
+    // Viewer-specific relationship projections are stored below the viewer's
+    // own account. A mobile client can access only its own projection and can
+    // write only the state and reason fields used by the relationship UI.
+    match /users/{userId}/relationships/{profileId} {
+      allow get, list: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'schemaVersion',
+          'romanticState',
+          'friendshipState',
+          'outgoingLikeReason',
+          'incomingLikeReason',
+          'outgoingFriendshipReason',
+          'incomingFriendshipReason',
+          'createdAt',
+          'updatedAt',
+        ])
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.romanticState in [
+          'none',
+          'likeSent',
+          'likeReceived',
+          'matched',
+          'unavailable',
+        ]
+        && request.resource.data.friendshipState in [
+          'none',
+          'offerSent',
+          'offerReceived',
+          'friends',
+        ]
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

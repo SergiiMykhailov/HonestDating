@@ -23,6 +23,76 @@ profile, biometric, consent, payment, or provider-token data.
 | `accountKind` | string, optional | `debugPreview` for the canonical debug-preview account only. |
 | `registrationCompletedAt` | timestamp, optional | Set once by the authenticated owner when mobile registration completes; used only to restore the signed-in app entry point. |
 
+## `users/{uid}/profiles/discovery`
+
+The discoverable, presentation-only projection of one registered user's
+profile. The document is always nested under its owning `users/{uid}` account;
+there is no root-level profile collection. It never holds viewer-specific
+relationship state, private user media, verification data, or FaceTec data.
+Viewer-specific relationship state is stored separately under the viewer.
+
+Authenticated clients may read these documents and their media metadata. All
+client writes remain denied.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `schemaVersion` | number | Current format version (`1`). |
+| `kind` | string | `person` for a discoverable member profile. |
+| `displayOrder` | number | Deterministic ordering within the current Discover pool. |
+| `firstName` / `age` / `distanceMiles` / `locationLabel` | string / number | Card and profile header data. |
+| `headline` | string | Profile About text. |
+| `primaryMediaId` | string | Document ID of the primary item in the `media` subcollection. |
+| `mediaIds` | array of strings | Ordered profile-media document IDs. |
+| `details` | array of maps | Display-only `{label, value}` profile attributes. |
+| `interests` | array of strings | Display-only interests. |
+| `questions` | array of maps | Display-only shared `{question, answer}` entries. |
+
+## `users/{uid}/profiles/discovery/media/{mediaId}`
+
+Metadata for one discoverable member image. The object itself lives in Cloud
+Storage under the same UID; Firestore stores no encoded image bytes and no
+public download URL.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `schemaVersion` | number | Current format version (`1`). |
+| `kind` | string | `primary` or a future gallery-media type. |
+| `displayOrder` | number | Stable display order within the profile. |
+| `storagePath` | string | Bucket-relative object path. |
+| `contentType` | string | Media MIME type. |
+| `byteSize` / `width` / `height` | number | Integrity and display metadata. |
+| `sha256` | string | SHA-256 digest of the uploaded source object. |
+
+Published image paths are under `users/{uid}/profile/{mediaId}.png` in the
+approved Firebase Storage bucket. Authenticated clients may read this prefix
+through Firebase Storage; all client writes remain denied.
+
+Discover queries use the `profiles.displayOrder` ascending collection-group
+index declared in `firestore.indexes.json`. It is required because profile
+documents are nested below multiple user IDs.
+
+## `users/{viewerUid}/relationships/{profileUid}`
+
+The authenticated viewer's relationship projection for another profile. The
+mobile app reads and updates only documents nested below its own UID. Profiles
+with no relationship document use the neutral `none` states. This keeps
+viewer-specific state out of public profile records and makes relationship UI
+consistent across all of the viewer's devices.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `schemaVersion` | number | Current format version (`1`). |
+| `romanticState` | string | `none`, `likeSent`, `likeReceived`, `matched`, or `unavailable`. |
+| `friendshipState` | string | `none`, `offerSent`, `offerReceived`, or `friends`. |
+| `outgoingLikeReason` / `incomingLikeReason` | string, optional | Viewer-side reason text for a romantic interaction. |
+| `outgoingFriendshipReason` / `incomingFriendshipReason` | string, optional | Viewer-side reason text for a friendship interaction. |
+| `createdAt` | timestamp, optional | Server timestamp used by seeded or server-created projections. |
+| `updatedAt` | timestamp | Most recent transition, set by Firestore server time. |
+
+This projection is the current Firebase-backed mobile contract. A future
+transactional relationship service should update both users' projections
+atomically before production messaging or notification delivery is enabled.
+
 ## `systemDebugPreviewAccounts/folia`
 
 Created and read only by the Go Cloud Run service when

@@ -21,6 +21,14 @@ service firebase.storage {
       allow read, update, delete: if false;
     }
 
+    // A discoverable profile's published media remains under its owner UID.
+    // It is readable by authenticated members only; mobile clients can never
+    // create, change, or delete it.
+    match /users/{userId}/profile/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

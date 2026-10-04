@@ -21,6 +21,11 @@ func TestFirestoreRulesKeepAccountOwnershipAndVerificationPrivacy(t *testing.T) 
 		"'registrationCompletedAt'",
 		"allow delete: if false;",
 		"match /users/{userId}/private/{document=**}",
+		"match /users/{userId}/profiles/{profileId}",
+		"match /{path=**}/profiles/{profileId}",
+		"match /users/{userId}/relationships/{profileId}",
+		"'romanticState'",
+		"'friendshipState'",
 		"allow read, write: if false;",
 	} {
 		if !strings.Contains(string(rules), requiredRule) {

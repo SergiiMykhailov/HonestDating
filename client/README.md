@@ -2,14 +2,13 @@
 
 A Flutter foundation for Honest Dating. It provides a reference-aligned visual
 system, a BLoC-driven Google/Apple authentication entry screen, named-route
-navigation, a local placeholder repository, and one representative Discover
-screen.
+navigation, and a Firebase-backed Discover preview.
 
 ## Structure
 
 - `lib/models` contains immutable domain models.
 - `lib/repositories/base` declares data contracts; `app_repositories` provides
-  the current local implementations.
+  their Firebase-backed implementations.
 - `lib/ui/routing` owns named routes and composition.
 - `lib/ui/screens` contains feature screens and their BLoCs.
 - `lib/ui/widgets` contains the shared controls used by Epic 1 flows.
@@ -19,14 +18,18 @@ screen.
 
 Firebase Core, Authentication, App Check, Firestore, and Storage are
 initialized by the mobile app. Google sign-in establishes the Firebase user
-required for private Storage uploads and Cloud Run requests. The Discover
-experience currently uses local fictional preview profiles. It supports
-vertical browsing, full profile details, shared 100 Questions answers, and
-device-local Like / Friendship Offer state. A Like and a Friendship Offer both
-require a 50–500 character reason; Like reasons remain private until mutual,
-while Friendship Offer reasons are immediately visible. This preview state is
-not persisted or shared between devices. Filters, real relationship storage,
-connection lists, and messaging arrive in later Epic 2 slices.
+required for private Storage uploads and Cloud Run requests. Discover profile
+content and its image locations are read from each owner's
+`users/{uid}/profiles/discovery` Firestore document; the images themselves are
+loaded from that user's authenticated Firebase Storage prefix. The app no
+longer bundles Discover photos or profile data. It supports vertical browsing,
+full profile details, and shared 100 Questions answers. Like / Friendship
+Offer state is loaded from and persisted to the signed-in viewer's
+`users/{uid}/relationships` Firestore subcollection, so it is shared across
+that account's devices. A Like and a
+Friendship Offer both require a 50–500 character reason; Like reasons remain
+private until mutual, while Friendship Offer reasons are immediately visible.
+Filters, connection lists, and messaging arrive in later Epic 2 slices.
 
 Server-side Firebase integration lives in [`../backend`](../backend),
 implemented in Go for Cloud Run. Its private verification formats are

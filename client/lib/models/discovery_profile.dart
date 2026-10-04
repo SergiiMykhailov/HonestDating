@@ -5,9 +5,9 @@ class DiscoveryProfile {
     required this.age,
     required this.distanceMiles,
     required this.locationLabel,
-    required this.primaryPhotoAsset,
+    required this.primaryPhotoUrl,
     required this.headline,
-    this.galleryPhotoAssets = const <String>[],
+    this.galleryPhotoUrls = const <String>[],
     this.details = const <DiscoveryProfileDetail>[],
     this.interests = const <String>[],
     this.questions = const <DiscoveryProfileQuestion>[],
@@ -19,9 +19,9 @@ class DiscoveryProfile {
   final int age;
   final int distanceMiles;
   final String locationLabel;
-  final String primaryPhotoAsset;
+  final String primaryPhotoUrl;
   final String headline;
-  final List<String> galleryPhotoAssets;
+  final List<String> galleryPhotoUrls;
   final List<DiscoveryProfileDetail> details;
   final List<String> interests;
   final List<DiscoveryProfileQuestion> questions;
@@ -34,9 +34,9 @@ class DiscoveryProfile {
       age: age,
       distanceMiles: distanceMiles,
       locationLabel: locationLabel,
-      primaryPhotoAsset: primaryPhotoAsset,
+      primaryPhotoUrl: primaryPhotoUrl,
       headline: headline,
-      galleryPhotoAssets: galleryPhotoAssets,
+      galleryPhotoUrls: galleryPhotoUrls,
       details: details,
       interests: interests,
       questions: questions,

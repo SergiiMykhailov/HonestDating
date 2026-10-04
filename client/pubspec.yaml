@@ -33,4 +33,3 @@ flutter:
   assets:
     - lib/resources/config/
     - lib/resources/localization/
-    - lib/resources/images/discover/

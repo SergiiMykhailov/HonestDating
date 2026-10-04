@@ -58,9 +58,11 @@ class _DiscoveryProfileView extends StatelessWidget {
                     children: [
                       AspectRatio(
                         aspectRatio: 0.86,
-                        child: Image.asset(
-                          profile.primaryPhotoAsset,
+                        child: Image.network(
+                          profile.primaryPhotoUrl,
                           fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const ColoredBox(color: AppColors.softCanvas),
                         ),
                       ),
                       Transform.translate(
@@ -323,11 +325,11 @@ class _ProfileSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              if (profile.galleryPhotoAssets.isNotEmpty) ...[
+              if (profile.galleryPhotoUrls.isNotEmpty) ...[
                 const SizedBox(height: 32),
                 const _SectionTitle('Gallery'),
                 const SizedBox(height: 14),
-                _ProfileGallery(paths: profile.galleryPhotoAssets),
+                _ProfileGallery(urls: profile.galleryPhotoUrls),
               ],
             ],
           ),
@@ -726,16 +728,16 @@ class _InterestChip extends StatelessWidget {
 }
 
 class _ProfileGallery extends StatelessWidget {
-  const _ProfileGallery({required this.paths});
+  const _ProfileGallery({required this.urls});
 
-  final List<String> paths;
+  final List<String> urls;
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: paths.length,
+      itemCount: urls.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 10,
@@ -745,7 +747,12 @@ class _ProfileGallery extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(14),
-          child: Image.asset(paths[index], fit: BoxFit.cover),
+          child: Image.network(
+            urls[index],
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                const ColoredBox(color: AppColors.softCanvas),
+          ),
         );
       },
     );

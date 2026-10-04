@@ -28,8 +28,7 @@ class DiscoveryProfileBloc
       final profile = await _repository.loadProfile(state.profile.id);
       emit(state.copyWith(profile: profile));
     } catch (_) {
-      // The navigation argument remains a usable local preview if the refresh
-      // cannot complete.
+      // Keep the last Firebase snapshot visible if a refresh cannot complete.
     }
   }
 

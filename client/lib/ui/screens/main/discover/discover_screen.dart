@@ -134,7 +134,12 @@ class _DiscoverProfileCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(profile.primaryPhotoAsset, fit: BoxFit.cover),
+            Image.network(
+              profile.primaryPhotoUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  const ColoredBox(color: AppColors.softCanvas),
+            ),
             const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
