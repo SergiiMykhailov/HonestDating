@@ -39,6 +39,8 @@ func main() {
 	mux.HandleFunc("POST /v1/relationships/{targetUid}/likes", service.SendLike)
 	mux.HandleFunc("POST /v1/relationships/{targetUid}/friendship-offers", service.SendFriendshipOffer)
 	mux.HandleFunc("POST /v1/relationships/{targetUid}/friendship-offers/acceptance", service.AcceptFriendshipOffer)
+	mux.HandleFunc("POST /v1/conversations/{targetUid}/messages", service.SendMessage)
+	mux.HandleFunc("POST /v1/conversations/{targetUid}/read", service.MarkConversationRead)
 	mux.HandleFunc("POST /events/storage", service.HandleStorageFinalized)
 
 	port := os.Getenv("PORT")

@@ -2,12 +2,14 @@ import 'package:honest_dating/repositories/app_repositories/app_authentication_r
 import 'package:honest_dating/repositories/app_repositories/app_authenticated_account_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_discovery_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_identity_verification_repository.dart';
+import 'package:honest_dating/repositories/app_repositories/app_messaging_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_profile_setup_repository.dart';
 import 'package:honest_dating/repositories/app_repositories/app_profile_photo_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_authentication_repository.dart';
 import 'package:honest_dating/repositories/base/base_authenticated_account_repository.dart';
 import 'package:honest_dating/repositories/base/base_discovery_repository.dart';
 import 'package:honest_dating/repositories/base/base_identity_verification_repository.dart';
+import 'package:honest_dating/repositories/base/base_messaging_repository.dart';
 import 'package:honest_dating/repositories/base/base_profile_setup_repository.dart';
 import 'package:honest_dating/repositories/base/base_profile_photo_verification_repository.dart';
 import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
@@ -26,6 +28,7 @@ class AppRepositoriesFactory implements BaseRepositoriesFactory {
     identityVerificationRepository: _identityVerificationRepository,
   );
   final BaseDiscoveryRepository _discoveryRepository = AppDiscoveryRepository();
+  final BaseMessagingRepository _messagingRepository = AppMessagingRepository();
 
   @override
   BaseAuthenticatedAccountRepository makeAuthenticatedAccountRepository() {
@@ -48,6 +51,9 @@ class AppRepositoriesFactory implements BaseRepositoriesFactory {
   BaseIdentityVerificationRepository makeIdentityVerificationRepository() {
     return _identityVerificationRepository;
   }
+
+  @override
+  BaseMessagingRepository makeMessagingRepository() => _messagingRepository;
 
   @override
   BaseProfilePhotoVerificationRepository

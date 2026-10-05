@@ -7,6 +7,7 @@ import 'package:honest_dating/ui/routing/base/base_router.dart';
 import 'package:honest_dating/ui/screens/main/discover/bloc/discovery_profile_bloc.dart';
 import 'package:honest_dating/ui/screens/main/discover/bloc/discovery_profile_event.dart';
 import 'package:honest_dating/ui/screens/main/discover/bloc/discovery_profile_state.dart';
+import 'package:honest_dating/ui/screens/main/messages/message_thread_screen.dart';
 import 'package:honest_dating/ui/widgets/app_action_button.dart';
 import 'package:honest_dating/ui/widgets/app_navigation_bar.dart';
 
@@ -167,6 +168,8 @@ class _ProfileSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final profile = state.profile;
     final relationship = profile.relationship;
+    final hasIncomingFriendshipOffer =
+        relationship.friendship == DiscoveryFriendshipState.offerReceived;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -213,6 +216,58 @@ class _ProfileSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 _RelationshipSummary(relationship: relationship),
+                if (relationship.friendship ==
+                    DiscoveryFriendshipState.offerReceived) ...[
+                  const SizedBox(height: 14),
+                  CupertinoButton(
+                    color: AppColors.plum,
+                    borderRadius: BorderRadius.circular(16),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    onPressed: state.isSubmitting ? null : onFriendshipPressed,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          CupertinoIcons.person_2_fill,
+                          size: 18,
+                          color: AppColors.canvas,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Accept friendship offer',
+                          style: TextStyle(
+                            color: AppColors.canvas,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (relationship.romantic == DiscoveryRomanticState.matched ||
+                    relationship.friendship ==
+                        DiscoveryFriendshipState.friends) ...[
+                  const SizedBox(height: 14),
+                  CupertinoButton.filled(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    onPressed: () => Navigator.of(context).pushNamed(
+                      BaseRouter.conversation,
+                      arguments: ChatThreadArguments(
+                        participantId: profile.id,
+                        participantName: profile.firstName,
+                        participantPhotoUrl: profile.primaryPhotoUrl,
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CupertinoIcons.chat_bubble_fill, size: 17),
+                        SizedBox(width: 8),
+                        Text('Message'),
+                      ],
+                    ),
+                  ),
+                ],
                 if (relationship.romantic ==
                     DiscoveryRomanticState.matched) ...[
                   if (relationship.incomingLikeReason
@@ -350,18 +405,20 @@ class _ProfileSheet extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _RoundConnectionAction(
-                semanticLabel: _friendshipActionLabel(relationship),
-                icon: _friendshipIcon(relationship),
-                color: AppColors.plum,
-                isAvailable: _canUseFriendshipAction(relationship),
-                isMarked:
-                    relationship.friendship ==
-                    DiscoveryFriendshipState.offerSent,
-                isLoading: state.isSubmitting,
-                onPressed: onFriendshipPressed,
-              ),
-              const SizedBox(width: 16),
+              if (!hasIncomingFriendshipOffer) ...[
+                _RoundConnectionAction(
+                  semanticLabel: _friendshipActionLabel(relationship),
+                  icon: _friendshipIcon(relationship),
+                  color: AppColors.plum,
+                  isAvailable: _canUseFriendshipAction(relationship),
+                  isMarked:
+                      relationship.friendship ==
+                      DiscoveryFriendshipState.offerSent,
+                  isLoading: state.isSubmitting,
+                  onPressed: onFriendshipPressed,
+                ),
+                const SizedBox(width: 16),
+              ],
               _RoundConnectionAction(
                 semanticLabel: _romanticActionLabel(relationship),
                 icon: _romanticIcon(relationship),

@@ -24,6 +24,8 @@ func TestFirestoreRulesKeepAccountOwnershipAndVerificationPrivacy(t *testing.T) 
 		"match /users/{userId}/profiles/{profileId}",
 		"match /{path=**}/profiles/{profileId}",
 		"match /users/{userId}/relationships/{profileId}",
+		"match /users/{userId}/conversations/{conversationId}",
+		"match /messages/{messageId}",
 		"match /users/{userId}/privateRelationships/{pairId}",
 		"allow write: if false;",
 		"allow read, write: if false;",

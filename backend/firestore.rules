@@ -120,6 +120,18 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Cloud Run maintains one private conversation projection per member. The
+    // app can read only its own projection and message copies.
+    match /users/{userId}/conversations/{conversationId} {
+      allow get, list: if isOwner(userId);
+      allow write: if false;
+
+      match /messages/{messageId} {
+        allow get, list: if isOwner(userId);
+        allow write: if false;
+      }
+    }
+
     // Canonical pair state is backend-only and never exposed to a client.
     match /users/{userId}/privateRelationships/{pairId} {
       allow read, write: if false;

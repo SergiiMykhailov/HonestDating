@@ -63,3 +63,15 @@ func TestRelationshipPairUIDsAreSorted(t *testing.T) {
 		t.Fatalf("relationshipPairUIDs() = %v", ids)
 	}
 }
+
+func TestMessagingRequiresMatchOrFriendship(t *testing.T) {
+	if _, err := messageConnectionKind(relationshipPair{Likes: map[string]string{"a": "reason"}}); err == nil {
+		t.Fatal("expected one-sided Like to be ineligible for messaging")
+	}
+	if kind, err := messageConnectionKind(relationshipPair{Friends: true}); err != nil || kind != "friendship" {
+		t.Fatalf("friendship kind = %q, err = %v", kind, err)
+	}
+	if kind, err := messageConnectionKind(relationshipPair{Likes: map[string]string{"a": "one", "b": "two"}}); err != nil || kind != "match" {
+		t.Fatalf("match kind = %q, err = %v", kind, err)
+	}
+}

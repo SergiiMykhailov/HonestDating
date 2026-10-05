@@ -8,6 +8,8 @@ import 'package:honest_dating/ui/screens/main/discover/discover_screen.dart';
 import 'package:honest_dating/ui/screens/main/discover/discovery_profile_preview_screen.dart';
 import 'package:honest_dating/ui/screens/main/discover/discovery_questions_screen.dart';
 import 'package:honest_dating/ui/screens/main/main_shell.dart';
+import 'package:honest_dating/ui/screens/main/messages/message_thread_screen.dart';
+import 'package:honest_dating/ui/screens/main/messages/messages_screen.dart';
 import 'package:honest_dating/ui/screens/launch/launch_screen.dart';
 import 'package:honest_dating/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:honest_dating/ui/screens/registration/age_eligibility_screen.dart';
@@ -110,9 +112,20 @@ class MainRouter implements BaseRouter {
               message: 'Matches will be introduced in a future product slice.',
             );
           case BaseRouter.messages:
-            return const PlaceholderScreen(
-              title: 'Messages',
-              message: 'Messages will be introduced in a future product slice.',
+            return MessagesScreen(
+              repository: _repositoriesFactory.makeMessagingRepository(),
+            );
+          case BaseRouter.conversation:
+            final arguments = settings.arguments;
+            if (arguments is! ChatThreadArguments) {
+              return const PlaceholderScreen(
+                title: 'Chat',
+                message: 'Open a chat from your messages or a connection.',
+              );
+            }
+            return MessageThreadScreen(
+              repository: _repositoriesFactory.makeMessagingRepository(),
+              arguments: arguments,
             );
           case BaseRouter.profile:
             return const PlaceholderScreen(

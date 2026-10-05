@@ -10,6 +10,7 @@ abstract interface class BaseRouter {
   static const String likes = '/likes';
   static const String matches = '/matches';
   static const String messages = '/messages';
+  static const String conversation = '/messages/conversation';
   static const String profile = '/profile';
   static const String phoneVerification = '/registration/phone-verification';
   static const String phoneVerificationCode =

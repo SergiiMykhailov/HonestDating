@@ -95,6 +95,34 @@ one Firestore transaction. A one-sided incoming Like reason is deliberately
 omitted from the recipient projection; both reasons become visible only after
 the Like is mutual. Friendship Offer reasons are visible immediately.
 
+## `users/{uid}/conversations/{conversationId}`
+
+An owner-only conversation projection. Cloud Run creates and updates both
+members' copies only after their canonical relationship is either a mutual Like
+or an accepted friendship. The mobile client can read only its own projection;
+it cannot write messages, unread counts, or timestamps.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `conversationId` | string | Deterministic canonical relationship-pair ID. |
+| `participantUid` | string | Firebase UID of the other member. |
+| `connectionKind` | string | `match` or `friendship`. |
+| `lastMessage` / `lastMessageAt` / `lastSenderUid` | string / timestamp / string | Chat-list preview and ordering. |
+| `unreadCount` | number | Messages received by this owner since their read acknowledgement. |
+| `updatedAt` | timestamp | Latest server-side conversation update. |
+
+### `users/{uid}/conversations/{conversationId}/messages/{messageId}`
+
+An owner-only copy of an individual text message. Cloud Run duplicates each
+message to both members inside the same Firestore transaction. Messages carry
+no media attachment, location, or verification data.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `senderUid` | string | UID of the sender. |
+| `text` | string | Trimmed content, limited to 1,000 characters. |
+| `sentAt` | timestamp | Shared server timestamp. |
+
 ## `users/{pairOwnerUid}/privateRelationships/{pairId}`
 
 Backend-only canonical relationship state for an unordered pair of users. The

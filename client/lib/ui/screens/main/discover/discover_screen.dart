@@ -182,7 +182,7 @@ class _ProfileCardCaption extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_outgoingStatus(profile.relationship) case final status?) ...[
+        if (_relationshipStatus(profile.relationship) case final status?) ...[
           _DiscoverRelationshipBadge(status: status),
           const SizedBox(height: 10),
         ],
@@ -212,18 +212,26 @@ class _ProfileCardCaption extends StatelessWidget {
   }
 }
 
-_OutgoingRelationshipStatus? _outgoingStatus(
+_DiscoverRelationshipStatus? _relationshipStatus(
   DiscoveryRelationship relationship,
 ) {
+  if (relationship.friendship == DiscoveryFriendshipState.offerReceived) {
+    return const _DiscoverRelationshipStatus(
+      label: 'Friendship offer received',
+      icon: CupertinoIcons.person_2_fill,
+      color: AppColors.plum,
+      isActionRequired: true,
+    );
+  }
   if (relationship.friendship == DiscoveryFriendshipState.offerSent) {
-    return const _OutgoingRelationshipStatus(
+    return const _DiscoverRelationshipStatus(
       label: 'Friendship offer sent',
       icon: CupertinoIcons.person_2_fill,
       color: AppColors.plum,
     );
   }
   if (relationship.romantic == DiscoveryRomanticState.likeSent) {
-    return const _OutgoingRelationshipStatus(
+    return const _DiscoverRelationshipStatus(
       label: 'Like sent',
       icon: CupertinoIcons.heart_fill,
       color: AppColors.coral,
@@ -232,22 +240,24 @@ _OutgoingRelationshipStatus? _outgoingStatus(
   return null;
 }
 
-class _OutgoingRelationshipStatus {
-  const _OutgoingRelationshipStatus({
+class _DiscoverRelationshipStatus {
+  const _DiscoverRelationshipStatus({
     required this.label,
     required this.icon,
     required this.color,
+    this.isActionRequired = false,
   });
 
   final String label;
   final IconData icon;
   final Color color;
+  final bool isActionRequired;
 }
 
 class _DiscoverRelationshipBadge extends StatelessWidget {
   const _DiscoverRelationshipBadge({required this.status});
 
-  final _OutgoingRelationshipStatus status;
+  final _DiscoverRelationshipStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +284,13 @@ class _DiscoverRelationshipBadge extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 5),
-              Icon(CupertinoIcons.check_mark, color: status.color, size: 14),
+              Icon(
+                status.isActionRequired
+                    ? CupertinoIcons.chevron_right
+                    : CupertinoIcons.check_mark,
+                color: status.color,
+                size: 14,
+              ),
             ],
           ),
         ),
