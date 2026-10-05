@@ -125,11 +125,16 @@ class _DiscoverProfileCard extends StatelessWidget {
       label: 'Open ${profile.firstName}\'s profile',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.of(
+        onTap: () async {
+          await Navigator.of(
             context,
             rootNavigator: true,
           ).pushNamed(BaseRouter.discoveryProfile, arguments: profile);
+          if (context.mounted) {
+            context.read<DiscoverScreenBloc>().add(
+              const DiscoverScreenLoadRequested(),
+            );
+          }
         },
         child: Stack(
           fit: StackFit.expand,
@@ -177,6 +182,10 @@ class _ProfileCardCaption extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_outgoingStatus(profile.relationship) case final status?) ...[
+          _DiscoverRelationshipBadge(status: status),
+          const SizedBox(height: 10),
+        ],
         Text(
           '${profile.firstName}, ${profile.age}',
           style: const TextStyle(
@@ -199,6 +208,77 @@ class _ProfileCardCaption extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+_OutgoingRelationshipStatus? _outgoingStatus(
+  DiscoveryRelationship relationship,
+) {
+  if (relationship.friendship == DiscoveryFriendshipState.offerSent) {
+    return const _OutgoingRelationshipStatus(
+      label: 'Friendship offer sent',
+      icon: CupertinoIcons.person_2_fill,
+      color: AppColors.plum,
+    );
+  }
+  if (relationship.romantic == DiscoveryRomanticState.likeSent) {
+    return const _OutgoingRelationshipStatus(
+      label: 'Like sent',
+      icon: CupertinoIcons.heart_fill,
+      color: AppColors.coral,
+    );
+  }
+  return null;
+}
+
+class _OutgoingRelationshipStatus {
+  const _OutgoingRelationshipStatus({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+}
+
+class _DiscoverRelationshipBadge extends StatelessWidget {
+  const _DiscoverRelationshipBadge({required this.status});
+
+  final _OutgoingRelationshipStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.canvas.withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(status.icon, color: status.color, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                status.label,
+                style: const TextStyle(
+                  color: AppColors.ink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Icon(CupertinoIcons.check_mark, color: status.color, size: 14),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

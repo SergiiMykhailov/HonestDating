@@ -36,6 +36,9 @@ func main() {
 	mux.HandleFunc("POST /v1/facetec/enrollments", service.StartFaceTecEnrollment)
 	mux.HandleFunc("POST /v1/profile-photo-verifications", service.StartProfilePhotoVerification)
 	mux.HandleFunc("GET /v1/profile-photo-verifications/{token}", service.GetProfilePhotoVerification)
+	mux.HandleFunc("POST /v1/relationships/{targetUid}/likes", service.SendLike)
+	mux.HandleFunc("POST /v1/relationships/{targetUid}/friendship-offers", service.SendFriendshipOffer)
+	mux.HandleFunc("POST /v1/relationships/{targetUid}/friendship-offers/acceptance", service.AcceptFriendshipOffer)
 	mux.HandleFunc("POST /events/storage", service.HandleStorageFinalized)
 
 	port := os.Getenv("PORT")

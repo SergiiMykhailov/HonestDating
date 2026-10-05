@@ -74,10 +74,11 @@ documents are nested below multiple user IDs.
 ## `users/{viewerUid}/relationships/{profileUid}`
 
 The authenticated viewer's relationship projection for another profile. The
-mobile app reads and updates only documents nested below its own UID. Profiles
-with no relationship document use the neutral `none` states. This keeps
-viewer-specific state out of public profile records and makes relationship UI
-consistent across all of the viewer's devices.
+mobile app can read only documents nested below its own UID; all writes are
+owned by the Cloud Run relationship service. Profiles with no relationship
+document use the neutral `none` states. This keeps viewer-specific state out
+of public profile records and makes the Interaction Center consistent across
+all of the viewer's devices.
 
 | Field | Type | Purpose |
 | --- | --- | --- |
@@ -89,9 +90,27 @@ consistent across all of the viewer's devices.
 | `createdAt` | timestamp, optional | Server timestamp used by seeded or server-created projections. |
 | `updatedAt` | timestamp | Most recent transition, set by Firestore server time. |
 
-This projection is the current Firebase-backed mobile contract. A future
-transactional relationship service should update both users' projections
-atomically before production messaging or notification delivery is enabled.
+The service updates both users' projections and their canonical pair record in
+one Firestore transaction. A one-sided incoming Like reason is deliberately
+omitted from the recipient projection; both reasons become visible only after
+the Like is mutual. Friendship Offer reasons are visible immediately.
+
+## `users/{pairOwnerUid}/privateRelationships/{pairId}`
+
+Backend-only canonical relationship state for an unordered pair of users. The
+owner is the lexicographically smaller UID and `pairId` is a deterministic
+SHA-256 digest of the sorted UIDs. Firestore and Storage clients cannot access
+these documents.
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `schemaVersion` | number | Current format version (`1`). |
+| `userIds` | string array | The two Firebase Authentication UIDs. |
+| `likes` | map | Like reason keyed by the sender UID. |
+| `friendshipSenderId` | string | UID that sent the pending/accepted friendship offer. |
+| `friendshipReason` | string | Meaningful reason attached to the offer. |
+| `friends` | boolean | Whether the friendship offer has been accepted. |
+| `updatedAt` | timestamp | Most recent atomic transition. |
 
 ## `systemDebugPreviewAccounts/folia`
 

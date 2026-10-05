@@ -1,23 +1,35 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:honest_dating/config/backend_configuration.dart';
 import 'package:honest_dating/models/discovery_profile.dart';
 import 'package:honest_dating/repositories/base/base_discovery_repository.dart';
+import 'package:http/http.dart' as http;
 
 /// Reads Discover profiles, media metadata, and viewer-specific relationship
-/// state from Firebase. Relationship transitions are persisted in Firestore.
+/// state from Firebase. Relationship transitions go through Cloud Run so both
+/// users' Firestore projections are updated atomically.
 class AppDiscoveryRepository implements BaseDiscoveryRepository {
   AppDiscoveryRepository({
     FirebaseAuth? authentication,
+    FirebaseAppCheck? appCheck,
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
+    http.Client? client,
   }) : _authentication = authentication ?? FirebaseAuth.instance,
+       _appCheck = appCheck ?? FirebaseAppCheck.instance,
        _firestore = firestore ?? FirebaseFirestore.instance,
-       _storage = storage ?? FirebaseStorage.instance;
+       _storage = storage ?? FirebaseStorage.instance,
+       _client = client ?? http.Client();
 
   final FirebaseAuth _authentication;
+  final FirebaseAppCheck _appCheck;
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
+  final http.Client _client;
   final Map<String, DiscoveryProfile> _profiles = <String, DiscoveryProfile>{};
 
   @override
@@ -50,6 +62,23 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
   }
 
   @override
+  Future<List<DiscoveryProfile>> loadRelationshipProfiles() async {
+    final viewerId = _authentication.currentUser?.uid;
+    if (viewerId == null) {
+      throw StateError('Please sign in again to view your connections.');
+    }
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(viewerId)
+        .collection('relationships')
+        .get();
+    final profiles = await Future.wait(
+      snapshot.docs.map((document) => loadProfile(document.id)),
+    );
+    return List<DiscoveryProfile>.unmodifiable(profiles);
+  }
+
+  @override
   Future<DiscoveryProfile> sendLike({
     required String profileId,
     required String reason,
@@ -66,22 +95,26 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
 
     switch (relationship.romantic) {
       case DiscoveryRomanticState.none:
-        return _persist(
+        return _performRelationshipAction(
           profile.copyWith(
             relationship: relationship.copyWith(
               romantic: DiscoveryRomanticState.likeSent,
               outgoingLikeReason: reason.trim(),
             ),
           ),
+          pathSuffix: 'likes',
+          reason: reason,
         );
       case DiscoveryRomanticState.likeReceived:
-        return _persist(
+        return _performRelationshipAction(
           profile.copyWith(
             relationship: relationship.copyWith(
               romantic: DiscoveryRomanticState.matched,
               outgoingLikeReason: reason.trim(),
             ),
           ),
+          pathSuffix: 'likes',
+          reason: reason,
         );
       case DiscoveryRomanticState.likeSent:
         throw StateError('You have already sent a Like to this person.');
@@ -113,7 +146,7 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
       throw StateError('You are already matched with this person.');
     }
 
-    return _persist(
+    return _performRelationshipAction(
       profile.copyWith(
         relationship: relationship.copyWith(
           romantic: DiscoveryRomanticState.unavailable,
@@ -121,6 +154,8 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
           outgoingFriendshipReason: reason.trim(),
         ),
       ),
+      pathSuffix: 'friendship-offers',
+      reason: reason,
     );
   }
 
@@ -131,13 +166,14 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
     if (relationship.friendship != DiscoveryFriendshipState.offerReceived) {
       throw StateError('There is no friendship offer to accept.');
     }
-    return _persist(
+    return _performRelationshipAction(
       profile.copyWith(
         relationship: relationship.copyWith(
           friendship: DiscoveryFriendshipState.friends,
           clearIncomingFriendshipReason: true,
         ),
       ),
+      pathSuffix: 'friendship-offers/acceptance',
     );
   }
 
@@ -224,37 +260,57 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
     );
   }
 
-  Future<DiscoveryProfile> _persist(DiscoveryProfile profile) async {
-    final viewerId = _authentication.currentUser?.uid;
-    if (viewerId == null) {
-      throw StateError('Please sign in again to update this relationship.');
+  Future<DiscoveryProfile> _performRelationshipAction(
+    DiscoveryProfile profile, {
+    required String pathSuffix,
+    String? reason,
+  }) async {
+    final uri = BackendConfiguration.endpoint(
+      '/v1/relationships/${Uri.encodeComponent(profile.id)}/$pathSuffix',
+    );
+    if (uri == null) {
+      throw StateError('Connections are temporarily unavailable.');
     }
-    final relationship = profile.relationship;
-    await _firestore
-        .collection('users')
-        .doc(viewerId)
-        .collection('relationships')
-        .doc(profile.id)
-        .set(<String, Object?>{
-          'schemaVersion': 1,
-          'romanticState': relationship.romantic.name,
-          'friendshipState': relationship.friendship.name,
-          'outgoingLikeReason': _valueOrDelete(relationship.outgoingLikeReason),
-          'incomingLikeReason': _valueOrDelete(relationship.incomingLikeReason),
-          'outgoingFriendshipReason': _valueOrDelete(
-            relationship.outgoingFriendshipReason,
-          ),
-          'incomingFriendshipReason': _valueOrDelete(
-            relationship.incomingFriendshipReason,
-          ),
-          'updatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-    _profiles[profile.id] = profile;
-    return profile;
+    final response = await _client.post(
+      uri,
+      headers: await _authenticatedHeaders(),
+      body: jsonEncode(
+        reason == null
+            ? const <String, Object?>{}
+            : <String, Object?>{'reason': reason.trim()},
+      ),
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final decoded = jsonDecode(response.body);
+      final message = decoded is Map<String, dynamic>
+          ? decoded['error'] as String?
+          : null;
+      throw StateError(message ?? 'The connection could not be updated.');
+    }
+    return loadProfile(profile.id);
   }
 
-  Object _valueOrDelete(String? value) {
-    return value ?? FieldValue.delete();
+  Future<Map<String, String>> _authenticatedHeaders() async {
+    // A debug-preview registration can establish its Firebase session before
+    // App Check has minted its first token. Force both token providers to
+    // refresh at the point an interaction is submitted, rather than silently
+    // treating an initial empty token as a sent request.
+    final idToken = await _authentication.currentUser?.getIdToken(true);
+    final appCheckToken = await _appCheck.getToken(true);
+    if (idToken == null ||
+        idToken.isEmpty ||
+        appCheckToken == null ||
+        appCheckToken.isEmpty) {
+      throw StateError(
+        'Your secure session has expired. Please sign in again.',
+      );
+    }
+    return <String, String>{
+      'Authorization': 'Bearer $idToken',
+      'X-Firebase-AppCheck': appCheckToken,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
   }
 
   T _enumValue<T extends Enum>(List<T> values, Object? rawValue, T fallback) {

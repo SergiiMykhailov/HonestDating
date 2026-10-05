@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:honest_dating/config/app_colors.dart';
 import 'package:honest_dating/repositories/base/base_repositories_factory.dart';
 import 'package:honest_dating/ui/screens/main/discover/discover_screen.dart';
+import 'package:honest_dating/ui/screens/main/interactions/interaction_center_screen.dart';
+import 'package:honest_dating/ui/screens/main/interactions/bloc/interaction_center_event.dart';
 import 'package:honest_dating/ui/screens/shared/placeholder_screen.dart';
 
 class MainShell extends StatelessWidget {
@@ -38,14 +40,14 @@ class MainShell extends StatelessWidget {
                   repository: _repositoriesFactory.makeDiscoveryRepository(),
                 );
               case 1:
-                return const PlaceholderScreen(
-                  title: 'Likes',
-                  message: 'Placeholder for future likes functionality.',
+                return InteractionCenterScreen(
+                  repository: _repositoriesFactory.makeDiscoveryRepository(),
+                  initialSection: InteractionSection.likesReceived,
                 );
               case 2:
-                return const PlaceholderScreen(
-                  title: 'Matches',
-                  message: 'Placeholder for future match functionality.',
+                return InteractionCenterScreen(
+                  repository: _repositoriesFactory.makeDiscoveryRepository(),
+                  initialSection: InteractionSection.matches,
                 );
               case 3:
                 return const PlaceholderScreen(

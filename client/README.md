@@ -23,13 +23,14 @@ content and its image locations are read from each owner's
 `users/{uid}/profiles/discovery` Firestore document; the images themselves are
 loaded from that user's authenticated Firebase Storage prefix. The app no
 longer bundles Discover photos or profile data. It supports vertical browsing,
-full profile details, and shared 100 Questions answers. Like / Friendship
-Offer state is loaded from and persisted to the signed-in viewer's
-`users/{uid}/relationships` Firestore subcollection, so it is shared across
-that account's devices. A Like and a
+full profile details, shared 100 Questions answers, and a Firebase-backed
+Interaction Center for Matches, Likes, Friends, and Friendship Offers. Like /
+Friendship Offer state is loaded from the signed-in viewer's
+`users/{uid}/relationships` Firestore subcollection and transitions are sent
+to Cloud Run, which atomically updates both users' projections. A Like and a
 Friendship Offer both require a 50–500 character reason; Like reasons remain
 private until mutual, while Friendship Offer reasons are immediately visible.
-Filters, connection lists, and messaging arrive in later Epic 2 slices.
+Filters and messaging arrive in later Epic 2 slices.
 
 Server-side Firebase integration lives in [`../backend`](../backend),
 implemented in Go for Cloud Run. Its private verification formats are

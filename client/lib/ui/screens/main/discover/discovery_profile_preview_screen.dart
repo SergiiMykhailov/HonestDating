@@ -170,172 +170,181 @@ class _ProfileSheet extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(24, 60, 24, 160),
-          decoration: const BoxDecoration(
-            color: AppColors.canvas,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${profile.firstName}, ${profile.age}',
-                style: const TextStyle(
-                  color: AppColors.ink,
-                  fontSize: 30,
-                  height: 1.1,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.7,
-                ),
-              ),
-              const SizedBox(height: 7),
-              Row(
-                children: [
-                  const Icon(
-                    CupertinoIcons.location_solid,
-                    color: AppColors.coral,
-                    size: 15,
+        Padding(
+          padding: const EdgeInsets.only(top: 34),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 160),
+            decoration: const BoxDecoration(
+              color: AppColors.canvas,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${profile.firstName}, ${profile.age}',
+                  style: const TextStyle(
+                    color: AppColors.ink,
+                    fontSize: 30,
+                    height: 1.1,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.7,
                   ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      '${profile.distanceMiles} ${profile.distanceMiles == 1 ? 'mile' : 'miles'} away · ${profile.locationLabel}',
-                      style: const TextStyle(
-                        color: AppColors.mutedInk,
-                        fontSize: 15,
+                ),
+                const SizedBox(height: 7),
+                Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.location_solid,
+                      color: AppColors.coral,
+                      size: 15,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '${profile.distanceMiles} ${profile.distanceMiles == 1 ? 'mile' : 'miles'} away · ${profile.locationLabel}',
+                        style: const TextStyle(
+                          color: AppColors.mutedInk,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _RelationshipSummary(relationship: relationship),
+                if (relationship.romantic ==
+                    DiscoveryRomanticState.matched) ...[
+                  if (relationship.incomingLikeReason
+                      case final String reason) ...[
+                    const SizedBox(height: 18),
+                    _ReasonCard(
+                      title: 'Why ${profile.firstName} liked you',
+                      message: reason,
+                    ),
+                  ],
+                  if (relationship.outgoingLikeReason
+                      case final String reason) ...[
+                    const SizedBox(height: 12),
+                    _ReasonCard(
+                      title: 'Why you liked ${profile.firstName}',
+                      message: reason,
+                    ),
+                  ],
                 ],
-              ),
-              const SizedBox(height: 18),
-              _RelationshipSummary(relationship: relationship),
-              if (relationship.romantic == DiscoveryRomanticState.matched) ...[
-                if (relationship.incomingLikeReason
+                if (relationship.incomingFriendshipReason
                     case final String reason) ...[
                   const SizedBox(height: 18),
                   _ReasonCard(
-                    title: 'Why ${profile.firstName} liked you',
+                    title: '${profile.firstName}’s friendship offer',
                     message: reason,
                   ),
                 ],
-                if (relationship.outgoingLikeReason
-                    case final String reason) ...[
-                  const SizedBox(height: 12),
-                  _ReasonCard(
-                    title: 'Why you liked ${profile.firstName}',
-                    message: reason,
+                if (state.feedbackMessage case final String message) ...[
+                  const SizedBox(height: 18),
+                  _ActionFeedback(
+                    message: message,
+                    isError: state.feedbackIsError,
+                    onDismiss: () {
+                      context.read<DiscoveryProfileBloc>().add(
+                        const DiscoveryProfileFeedbackDismissed(),
+                      );
+                    },
                   ),
                 ],
-              ],
-              if (relationship.incomingFriendshipReason
-                  case final String reason) ...[
-                const SizedBox(height: 18),
-                _ReasonCard(
-                  title: '${profile.firstName}’s friendship offer',
-                  message: reason,
-                ),
-              ],
-              if (state.feedbackMessage case final String message) ...[
-                const SizedBox(height: 18),
-                _ActionFeedback(
-                  message: message,
-                  isError: state.feedbackIsError,
-                  onDismiss: () {
-                    context.read<DiscoveryProfileBloc>().add(
-                      const DiscoveryProfileFeedbackDismissed(),
-                    );
-                  },
-                ),
-              ],
-              const SizedBox(height: 32),
-              const _SectionTitle('About'),
-              const SizedBox(height: 10),
-              Text(
-                profile.headline,
-                style: const TextStyle(
-                  color: AppColors.mutedInk,
-                  fontSize: 17,
-                  height: 1.45,
-                ),
-              ),
-              if (profile.details.isNotEmpty) ...[
                 const SizedBox(height: 32),
-                const _SectionTitle('Basic info'),
-                const SizedBox(height: 14),
-                _ProfileDetails(details: profile.details),
-              ],
-              if (profile.interests.isNotEmpty) ...[
-                const SizedBox(height: 32),
-                const _SectionTitle('Interests'),
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: profile.interests
-                      .map((String interest) => _InterestChip(label: interest))
-                      .toList(),
-                ),
-              ],
-              const SizedBox(height: 32),
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: onQuestionsPressed,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppColors.softCanvas,
-                    border: Border.all(color: AppColors.line),
-                    borderRadius: BorderRadius.circular(16),
+                const _SectionTitle('About'),
+                const SizedBox(height: 10),
+                Text(
+                  profile.headline,
+                  style: const TextStyle(
+                    color: AppColors.mutedInk,
+                    fontSize: 17,
+                    height: 1.45,
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 17, vertical: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '100 Questions for Us',
-                                style: TextStyle(
-                                  color: AppColors.ink,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
+                ),
+                if (profile.details.isNotEmpty) ...[
+                  const SizedBox(height: 32),
+                  const _SectionTitle('Basic info'),
+                  const SizedBox(height: 14),
+                  _ProfileDetails(details: profile.details),
+                ],
+                if (profile.interests.isNotEmpty) ...[
+                  const SizedBox(height: 32),
+                  const _SectionTitle('Interests'),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: profile.interests
+                        .map(
+                          (String interest) => _InterestChip(label: interest),
+                        )
+                        .toList(),
+                  ),
+                ],
+                const SizedBox(height: 32),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: onQuestionsPressed,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.softCanvas,
+                      border: Border.all(color: AppColors.line),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 17,
+                        vertical: 16,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '100 Questions for Us',
+                                  style: TextStyle(
+                                    color: AppColors.ink,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 3),
-                              Text(
-                                'Get to know each other beyond the basics',
-                                style: TextStyle(
-                                  color: AppColors.mutedInk,
-                                  fontSize: 14,
+                                SizedBox(height: 3),
+                                Text(
+                                  'Get to know each other beyond the basics',
+                                  style: TextStyle(
+                                    color: AppColors.mutedInk,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        Icon(
-                          CupertinoIcons.chevron_right,
-                          color: AppColors.coral,
-                          size: 18,
-                        ),
-                      ],
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            color: AppColors.coral,
+                            size: 18,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              if (profile.galleryPhotoUrls.isNotEmpty) ...[
-                const SizedBox(height: 32),
-                const _SectionTitle('Gallery'),
-                const SizedBox(height: 14),
-                _ProfileGallery(urls: profile.galleryPhotoUrls),
+                if (profile.galleryPhotoUrls.isNotEmpty) ...[
+                  const SizedBox(height: 32),
+                  const _SectionTitle('Gallery'),
+                  const SizedBox(height: 14),
+                  _ProfileGallery(urls: profile.galleryPhotoUrls),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         Positioned(
-          top: -34,
+          top: 0,
           left: 0,
           right: 0,
           child: Row(
@@ -346,6 +355,9 @@ class _ProfileSheet extends StatelessWidget {
                 icon: _friendshipIcon(relationship),
                 color: AppColors.plum,
                 isAvailable: _canUseFriendshipAction(relationship),
+                isMarked:
+                    relationship.friendship ==
+                    DiscoveryFriendshipState.offerSent,
                 isLoading: state.isSubmitting,
                 onPressed: onFriendshipPressed,
               ),
@@ -355,6 +367,8 @@ class _ProfileSheet extends StatelessWidget {
                 icon: _romanticIcon(relationship),
                 color: AppColors.coral,
                 isAvailable: _canUseRomanticAction(relationship),
+                isMarked:
+                    relationship.romantic == DiscoveryRomanticState.likeSent,
                 isLoading: state.isSubmitting,
                 onPressed: onLikePressed,
               ),
@@ -421,6 +435,7 @@ class _RoundConnectionAction extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.isAvailable,
+    required this.isMarked,
     required this.isLoading,
     required this.onPressed,
   });
@@ -429,6 +444,7 @@ class _RoundConnectionAction extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isAvailable;
+  final bool isMarked;
   final bool isLoading;
   final VoidCallback onPressed;
 
@@ -456,14 +472,42 @@ class _RoundConnectionAction extends StatelessWidget {
           child: SizedBox(
             width: 68,
             height: 68,
-            child: Center(
-              child: isLoading
-                  ? const CupertinoActivityIndicator(color: AppColors.coral)
-                  : Icon(
-                      icon,
-                      color: isAvailable ? color : AppColors.line,
-                      size: 31,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Center(
+                  child: isLoading
+                      ? const CupertinoActivityIndicator(color: AppColors.coral)
+                      : Icon(
+                          icon,
+                          color: isAvailable || isMarked
+                              ? color
+                              : AppColors.line,
+                          size: 31,
+                        ),
+                ),
+                if (isMarked)
+                  Positioned(
+                    top: 1,
+                    right: 1,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.canvas, width: 2),
+                      ),
+                      child: const SizedBox(
+                        width: 21,
+                        height: 21,
+                        child: Icon(
+                          CupertinoIcons.check_mark,
+                          color: AppColors.canvas,
+                          size: 13,
+                        ),
+                      ),
                     ),
+                  ),
+              ],
             ),
           ),
         ),

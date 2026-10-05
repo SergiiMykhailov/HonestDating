@@ -5,6 +5,8 @@ abstract interface class BaseDiscoveryRepository {
 
   Future<DiscoveryProfile> loadProfile(String profileId);
 
+  Future<List<DiscoveryProfile>> loadRelationshipProfiles();
+
   Future<DiscoveryProfile> sendLike({
     required String profileId,
     required String reason,

@@ -113,38 +113,16 @@ service cloud.firestore {
     }
 
     // Viewer-specific relationship projections are stored below the viewer's
-    // own account. A mobile client can access only its own projection and can
-    // write only the state and reason fields used by the relationship UI.
+    // own account. They are written atomically by the relationship service;
+    // mobile clients can read only their own projection.
     match /users/{userId}/relationships/{profileId} {
       allow get, list: if isOwner(userId);
-      allow create, update: if isOwner(userId)
-        && request.resource.data.keys().hasOnly([
-          'schemaVersion',
-          'romanticState',
-          'friendshipState',
-          'outgoingLikeReason',
-          'incomingLikeReason',
-          'outgoingFriendshipReason',
-          'incomingFriendshipReason',
-          'createdAt',
-          'updatedAt',
-        ])
-        && request.resource.data.schemaVersion == 1
-        && request.resource.data.romanticState in [
-          'none',
-          'likeSent',
-          'likeReceived',
-          'matched',
-          'unavailable',
-        ]
-        && request.resource.data.friendshipState in [
-          'none',
-          'offerSent',
-          'offerReceived',
-          'friends',
-        ]
-        && request.resource.data.updatedAt == request.time;
-      allow delete: if false;
+      allow write: if false;
+    }
+
+    // Canonical pair state is backend-only and never exposed to a client.
+    match /users/{userId}/privateRelationships/{pairId} {
+      allow read, write: if false;
     }
 
     match /{document=**} {
