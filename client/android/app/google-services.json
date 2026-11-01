@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "404327340840",
+    "project_id": "honestdating-22e7b",
+    "storage_bucket": "honestdating-22e7b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404327340840:android:1da7626ab546c21bfdce1d",
+        "android_client_info": {
+          "package_name": "com.honestdating"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "404327340840-lm5me5u8i9pvg946q5aqpn0o43rubsmr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.honestdating",
+            "certificate_hash": "b432c9492d73ca15da3f62f6249652d40f84c0e1"
+          }
+        },
+        {
+          "client_id": "404327340840-uj0vrsb314vv7ufefvu4la8k6slv73gj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAU5GwXo6t2hhRqqOS-wliivOR03Mby1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "404327340840-uj0vrsb314vv7ufefvu4la8k6slv73gj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "404327340840-180uaobf7l4ii80ave2rq1oap1jr8jt4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.honestdating"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

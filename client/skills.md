@@ -12,6 +12,7 @@
 - Use local fake data unless an approved backend contract and configuration are supplied.
 - Keep the documented database structure current whenever an entity, field, collection, or stored-data format is added, changed, or removed. Update the relevant database documentation in the same change.
 - Do not add API keys, secrets, access tokens, personal data, or production endpoints to source control, fixtures, logs, or sample data.
+- The product owner explicitly approved tracking Android's public Firebase client configuration in `android/app/google-services.json` for reproducible builds. This exception does not cover service-account credentials, App Check debug tokens, or signing keys.
 - Do not request a device permission or add an analytics/advertising SDK without an explicit product requirement and a reviewed user-facing purpose string.
 
 ## Dart and Flutter conventions

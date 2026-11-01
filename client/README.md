@@ -93,9 +93,20 @@ memory only for the active registration flow.
 
 The iOS Firebase configuration is supplied locally at
 `ios/Runner/Firebase/Staging/GoogleService-Info.plist` and is copied into the
-Runner target at build time. Add `android/app/google-services.json` before
-running the Android app; its Firebase app must use the `com.honestdating`
-application ID.
+Runner target at build time. Android's public Firebase client configuration is
+tracked at `android/app/google-services.json` and connects `com.honestdating`
+to the existing Honest Dating Firebase project. The Gradle wrapper is tracked
+as well; no Firebase configuration file needs to be copied for an Android build.
+
+On another machine, install Flutter, Android Studio's Android SDK, and a supported
+JDK, then run `flutter pub get` and `flutter run -d <android-device-id>` from
+`client/`. Flutter generates machine-specific `android/local.properties`.
+
+Firebase authorization still applies per development machine: register that
+machine's debug signing certificate SHA-1/SHA-256 fingerprints with the Firebase
+Android app for Google sign-in, and register the emulator's App Check debug
+token in Firebase App Check. Do not commit the debug keystore or App Check token.
+These registrations do not require changes to the tracked client configuration.
 
 ## FaceTec Test API (iOS Debug only)
 

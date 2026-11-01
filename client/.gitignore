@@ -44,9 +44,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Firebase app configuration is supplied locally per environment.
+# iOS Firebase app configuration is supplied locally per environment.
+# Android's public Firebase configuration is tracked for cloneable builds.
 ios/Runner/Firebase/**/GoogleService-Info.plist
-android/app/google-services.json
 
 # FaceTec device SDKs and Test API credentials are local development material.
 .facetec/
