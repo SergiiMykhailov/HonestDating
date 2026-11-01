@@ -1,7 +1,10 @@
 import 'package:honest_dating/models/discovery_profile.dart';
+import 'package:honest_dating/models/discovery_filters.dart';
 
 abstract interface class BaseDiscoveryRepository {
-  Future<List<DiscoveryProfile>> loadProfiles();
+  Future<List<DiscoveryProfile>> loadProfiles({
+    DiscoveryFilters filters = DiscoveryFilters.none,
+  });
 
   Future<DiscoveryProfile> loadProfile(String profileId);
 

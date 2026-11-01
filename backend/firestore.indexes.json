@@ -1,5 +1,42 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "profiles",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "age", "order": "ASCENDING"},
+        {"fieldPath": "distanceMiles", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "profiles",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "datingIntention", "order": "ASCENDING"},
+        {"fieldPath": "age", "order": "ASCENDING"},
+        {"fieldPath": "distanceMiles", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "profiles",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "interests", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "age", "order": "ASCENDING"},
+        {"fieldPath": "distanceMiles", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "profiles",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "datingIntention", "order": "ASCENDING"},
+        {"fieldPath": "interests", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "age", "order": "ASCENDING"},
+        {"fieldPath": "distanceMiles", "order": "ASCENDING"}
+      ]
+    }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "profiles",

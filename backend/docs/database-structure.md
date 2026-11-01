@@ -44,6 +44,7 @@ client writes remain denied.
 | `primaryMediaId` | string | Document ID of the primary item in the `media` subcollection. |
 | `mediaIds` | array of strings | Ordered profile-media document IDs. |
 | `details` | array of maps | Display-only `{label, value}` profile attributes. |
+| `datingIntention` | string | Normalized filter value: `longTerm`, `openToLongTerm`, or `friendshipOnly`. The matching detail remains the display label. |
 | `interests` | array of strings | Display-only interests. |
 | `questions` | array of maps | Display-only shared `{question, answer}` entries. |
 
@@ -67,9 +68,10 @@ Published image paths are under `users/{uid}/profile/{mediaId}.png` in the
 approved Firebase Storage bucket. Authenticated clients may read this prefix
 through Firebase Storage; all client writes remain denied.
 
-Discover queries use the `profiles.displayOrder` ascending collection-group
-index declared in `firestore.indexes.json`. It is required because profile
-documents are nested below multiple user IDs.
+Discover queries use the `profiles` collection group and Firestore indexes
+declared in `firestore.indexes.json`. They support indexed age, distance,
+dating-intention, and interest filters while profile documents remain nested
+below their owners.
 
 ## `users/{viewerUid}/relationships/{profileUid}`
 

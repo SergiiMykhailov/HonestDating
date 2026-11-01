@@ -5,6 +5,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:honest_dating/config/backend_configuration.dart';
+import 'package:honest_dating/models/discovery_filters.dart';
 import 'package:honest_dating/models/discovery_profile.dart';
 import 'package:honest_dating/repositories/base/base_discovery_repository.dart';
 import 'package:http/http.dart' as http;
@@ -33,16 +34,86 @@ class AppDiscoveryRepository implements BaseDiscoveryRepository {
   final Map<String, DiscoveryProfile> _profiles = <String, DiscoveryProfile>{};
 
   @override
-  Future<List<DiscoveryProfile>> loadProfiles() async {
-    final snapshot = await _firestore
-        .collectionGroup('profiles')
-        .orderBy('displayOrder')
-        .get();
-    final profiles = await Future.wait(snapshot.docs.map(_profileFromSnapshot));
+  Future<List<DiscoveryProfile>> loadProfiles({
+    DiscoveryFilters filters = DiscoveryFilters.none,
+  }) async {
+    Query<Map<String, dynamic>> query = _firestore.collectionGroup('profiles');
+    if (filters.minimumAge != 18) {
+      query = query.where('age', isGreaterThanOrEqualTo: filters.minimumAge);
+    }
+    if (filters.maximumAge != 99) {
+      query = query.where('age', isLessThanOrEqualTo: filters.maximumAge);
+    }
+    if (filters.maximumDistanceMiles case final int maximumDistance) {
+      query = query.where(
+        'distanceMiles',
+        isLessThanOrEqualTo: maximumDistance,
+      );
+    }
+    if (filters.datingIntention case final DiscoveryDatingIntention intention) {
+      query = query.where('datingIntention', isEqualTo: intention.name);
+    }
+    if (filters.interest case final String interest) {
+      query = query.where('interests', arrayContains: interest);
+    }
+
+    final documents = await _filteredProfileDocuments(query, filters);
+    documents.sort((first, second) {
+      final firstOrder = (first.data()['displayOrder'] as num?)?.toInt() ?? 0;
+      final secondOrder = (second.data()['displayOrder'] as num?)?.toInt() ?? 0;
+      return firstOrder.compareTo(secondOrder);
+    });
+    final profiles = await Future.wait(documents.map(_profileFromSnapshot));
     for (final profile in profiles) {
       _profiles[profile.id] = profile;
     }
     return List<DiscoveryProfile>.unmodifiable(profiles);
+  }
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+  _filteredProfileDocuments(
+    Query<Map<String, dynamic>> query,
+    DiscoveryFilters filters,
+  ) async {
+    try {
+      return (await query.get()).docs;
+    } on FirebaseException catch (error) {
+      // Fresh composite indexes can take a short time to become ready. Keep
+      // Discover usable from the same Firestore source during that window;
+      // any other Firestore failure remains visible to the caller.
+      if (error.code != 'failed-precondition' ||
+          !(error.message?.contains('requires an index') ?? false)) {
+        rethrow;
+      }
+      final snapshot = await _firestore.collectionGroup('profiles').get();
+      return snapshot.docs
+          .where((document) => _matchesFilters(document.data(), filters))
+          .toList(growable: false);
+    }
+  }
+
+  bool _matchesFilters(Map<String, dynamic> data, DiscoveryFilters filters) {
+    final age = (data['age'] as num?)?.toInt();
+    final distance = (data['distanceMiles'] as num?)?.toInt();
+    if (age == null ||
+        distance == null ||
+        age < filters.minimumAge ||
+        age > filters.maximumAge) {
+      return false;
+    }
+    if (filters.maximumDistanceMiles case final int maximumDistance) {
+      if (distance > maximumDistance) return false;
+    }
+    if (filters.datingIntention case final DiscoveryDatingIntention intention) {
+      if (data['datingIntention'] != intention.name) return false;
+    }
+    if (filters.interest case final String interest) {
+      final interests = data['interests'];
+      if (interests is! Iterable<Object?> || !interests.contains(interest)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override

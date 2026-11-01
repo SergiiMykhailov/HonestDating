@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:honest_dating/models/discovery_filters.dart';
 import 'package:honest_dating/models/discovery_profile.dart';
 import 'package:honest_dating/repositories/base/base_discovery_repository.dart';
 import 'package:honest_dating/ui/screens/main/discover/discover_screen.dart';
@@ -108,7 +109,9 @@ class _ProfileRepository implements BaseDiscoveryRepository {
   Future<DiscoveryProfile> loadProfile(String profileId) async => profile;
 
   @override
-  Future<List<DiscoveryProfile>> loadProfiles() async => [profile];
+  Future<List<DiscoveryProfile>> loadProfiles({
+    DiscoveryFilters filters = DiscoveryFilters.none,
+  }) async => [profile];
 
   @override
   Future<List<DiscoveryProfile>> loadRelationshipProfiles() async => [profile];
